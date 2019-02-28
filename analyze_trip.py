@@ -1,3 +1,4 @@
+import shapefile
 from pymongo import MongoClient
 from datetime import timedelta, date
 import datetime
@@ -46,7 +47,7 @@ def convert_to_timestamp(time_string, single_date, summer_time):
 
     today_seconds = int(
         (single_date - date(1970, 1, 1)).total_seconds()) + 18000 - summer_time*3600
-    
+
     return total_second+today_seconds
 
 
@@ -54,7 +55,8 @@ def convert_to_timestamp(time_string, single_date, summer_time):
 # enumerate every day in the range
 designated_route = 1
 walking_time_limit = 10
-buffer=120
+buffer = 120
+criteria = 5
 
 
 def analyze_transfer(start_date, end_date):
@@ -73,66 +75,115 @@ def analyze_transfer(start_date, end_date):
         db_today_real_time = db_real_time["R" + today_date]
         db_today_trip_update = db_trip_update[today_date]
 
-        # for single_trip in rs_all_trips:
-        #    trip_id=single_trip["trip_id"]
         rs_all_trips = list(db_trips.find(
             {"route_id": "{:03d}".format(designated_route)}))
 
-        single_trip = rs_all_trips[int(len(rs_all_trips)/3)]
+        count=0
+        total_count= len(rs_all_trips)
+        for single_trip in rs_all_trips:
+            print(count/total_count)
+            count+=1
+            trip_id = single_trip["trip_id"]  # emurate rs_all_trips
 
-        trip_id = single_trip["trip_id"]  # emurate rs_all_trips
+            rs_all_stops = list(db_stop_times.find({"trip_id": trip_id}))
 
-        rs_all_stops = list(db_stop_times.find({"trip_id": trip_id}))
+            for single_stop_time in rs_all_stops:
+                stop_id = single_stop_time["stop_id"]  # query stop_times
+                try:
+                    dic_stops[stop_id]
+                except:
+                    line = {}
+                    a_stop = list(db_stops.find({"stop_id": stop_id}))
+                    if a_stop == []:
+                        continue
+                    else:
+                        a_stop = a_stop[0]
+                    line['lat'] = a_stop['stop_lat']
+                    line['lon'] = a_stop['stop_lon']
+                    line["M0"] = 0  # MISS COUNT
+                    line["M1"] = 0
+                    line['M2'] = 0
+                    line['M3'] = 0
+                    line['M4'] = 0
+                    line['M5'] = 0
+                    line['M6'] = 0
+                    line['M7'] = 0
+                    line['M8'] = 0
+                    line["M9"] = 0
 
-        single_stop_time = rs_all_stops[int(len(rs_all_stops)/3)]
+                    line["T"] = 0  # TOTAL COUNT
+                    dic_stops[stop_id] = line
 
-        stop_id = single_stop_time["stop_id"]  # query stop_times
+                for time_walking in range(walking_time_limit):
+                    time_smart = 999  # past_predicted_time + walking_time
 
-        for time_walking in range(walking_time_limit):
-            time_smart = 999  # past_predicted_time + walking_time
-            
-            rs_all_trip_update = db_today_trip_update.find({"trip_id":trip_id}, no_cursor_timeout=True)
+                    rs_all_trip_update = db_today_trip_update.find(
+                        {"trip_id": trip_id}, no_cursor_timeout=True)
 
-            time_current=0
-            time_current_backup = 0
-            time_feed = -1
-            for single_feed in rs_all_trip_update:
-                time_feed = 0
-                time_current_backup = time_current
-                time_current = single_feed["ts"]
-                for each_stop in single_feed["seq"]:
-                    if each_stop["stop"]==stop_id:
+                    time_current = 0
+                    time_current_backup = 0
+                    time_feed = -1
+                    for single_feed in rs_all_trip_update:
+                        time_feed = 0
                         time_current_backup = time_current
-                        time_feed = each_stop["arr"]
-                        break
-                if time_feed == 0:
-                    break
-                if time_feed!= 0 and time_current + time_walking*60 > time_feed:
-                    time_smart = time_current_backup + time_walking*60
-                    break
+                        time_current = single_feed["ts"]
+                        for each_stop in single_feed["seq"]:
+                            if each_stop["stop"] == stop_id:
+                                time_current_backup = time_current
+                                time_feed = each_stop["arr"]
+                                break
+                        if time_feed == 0:
+                            break
+                        if time_feed != 0 and time_current + time_walking*60 > time_feed:
+                            time_smart = time_current_backup + time_walking*60
+                            break
 
-            if time_current + time_walking*60 +buffer > time_feed and time_current + time_walking*60 < time_feed:
-                time_smart = time_current + time_walking*60
+                    if time_current + time_walking*60 + buffer > time_feed and time_current + time_walking*60 < time_feed:
+                        time_smart = time_current + time_walking*60
 
-            
-            time_normal = convert_to_timestamp(single_stop_time["arrival_time"], single_date, summer_time)  # schedule
+                    time_normal = convert_to_timestamp(
+                        single_stop_time["arrival_time"], single_date, summer_time)  # schedule
 
-            real_time = list(db_today_real_time.find({"stop_id":stop_id,"trip_id":trip_id}))
+                    real_time = list(db_today_real_time.find(
+                        {"stop_id": stop_id, "trip_id": trip_id}))
 
-            if (len(real_time) == 0):
-                continue
-            else:
-                time_actual = real_time[0]["time"]
+                    if (len(real_time) == 0):
+                        continue
+                    else:
+                        time_actual = real_time[0]["time"]
 
-            if (time_smart>time_actual):
-                status = 1
-            else:
-                status = 0
-            diff_time = time_smart - time_normal
+                    if (time_smart - time_actual > criteria):
+                        status = 1
+                        dic_stops[stop_id]["M" +
+                                           str(time_walking)] = dic_stops[stop_id]["M"+str(time_walking)]+1
+                    else:
+                        status = 0
+                    dic_stops[stop_id]["T"] = dic_stops[stop_id]["T"]+1
+                    
+                    diff_time = time_smart - time_normal
 
-            print(time_normal, time_smart, time_actual)
-            print(today_date,time_walking, diff_time, status, summer_time)
+                
 
+    location = 'D:\\Luyu\\SmartTransit\\Data\\test.shp'
+    print(location)
+    w = shapefile.Writer(location)
+    w.field("stop_id", "C")
+    w.field("M0", "N")
+    w.field("M1", "N")
+    w.field("M2", "N")
+    w.field("M3", "N")
+    w.field("M4", "N")
+    w.field("M5", "N")
+    w.field("M6", "N")
+    w.field("M7", "N")
+    w.field("M8", "N")
+    w.field("M9", "N")
+    w.field("T", "N")
+
+    for key, value in dic_stops.items():
+        w.record(key,  value['M0'], value['M1'], value['M2'], value['M3'], value['M4'], value['M5'], value['M6'], value['M7'],
+                 value['M8'], value['M9'],value['T'])
+        w.point(float(value['lon']), float(value['lat']))
 
 
 if __name__ == '__main__':
