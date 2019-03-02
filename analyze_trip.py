@@ -8,7 +8,7 @@ client = MongoClient('mongodb://localhost:27017/')
 db_GTFS = client.cota_gtfs
 db_real_time = client.cota_real_time
 db_trip_update = client.trip_update
-
+db_smart_transit = client.cota_smart_transit
 
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
@@ -68,6 +68,8 @@ def analyze_transfer(start_date, end_date):
         else:
             summer_time = 1
         today_date = single_date.strftime("%Y%m%d")  # date
+        db_today_smart_transit = db_smart_transit[today_date]
+
         that_time_stamp = find_gtfs_time_stamp(single_date)
         db_stops = db_GTFS[str(that_time_stamp) + "_stops"]
         db_trips = db_GTFS[str(that_time_stamp) + "_trips"]
@@ -162,7 +164,7 @@ def analyze_transfer(start_date, end_date):
                     
                     diff_time = time_smart - time_normal
 
-                
+        
 
     location = 'D:\\Luyu\\SmartTransit\\Data\\test.shp'
     print(location)
