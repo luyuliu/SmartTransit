@@ -1,4 +1,3 @@
-import shapefile
 from pymongo import MongoClient
 from datetime import timedelta, date
 import datetime
