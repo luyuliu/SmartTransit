@@ -53,7 +53,7 @@ def convert_to_timestamp(time_string, single_date, summer_time):
 
 # main loop
 # enumerate every day in the range
-designated_route = 1
+designated_route = 2
 walking_time_limit = 10
 buffer = 120
 criteria = 5
@@ -77,121 +77,82 @@ def analyze_transfer(start_date, end_date):
         db_today_real_time = db_real_time["R" + today_date]
         db_today_trip_update = db_trip_update[today_date]
 
-        rs_all_trips = list(db_trips.find(
-            {"route_id": "{:03d}".format(designated_route)}))
+        rs_all_stop_time = list(db_today_smart_transit.find({"route_id" : designated_route}))
 
         count=0
-        total_count= len(rs_all_trips)
-        for single_trip in rs_all_trips:
+        total_count= len(rs_all_stop_time)
+
+
+        for single_stop_time in rs_all_stop_time:
             print(count/total_count)
-            count+=1
-            trip_id = single_trip["trip_id"]  # emurate rs_all_trips
-
-            rs_all_stops = list(db_stop_times.find({"trip_id": trip_id}))
-
-            for single_stop_time in rs_all_stops:
-                stop_id = single_stop_time["stop_id"]  # query stop_times
-                try:
-                    dic_stops[stop_id]
-                except:
-                    line = {}
-                    a_stop = list(db_stops.find({"stop_id": stop_id}))
-                    if a_stop == []:
-                        continue
-                    else:
-                        a_stop = a_stop[0]
-                    line['lat'] = a_stop['stop_lat']
-                    line['lon'] = a_stop['stop_lon']
-                    line["M0"] = 0  # MISS COUNT
-                    line["M1"] = 0
-                    line['M2'] = 0
-                    line['M3'] = 0
-                    line['M4'] = 0
-                    line['M5'] = 0
-                    line['M6'] = 0
-                    line['M7'] = 0
-                    line['M8'] = 0
-                    line["M9"] = 0
-
-                    line["T"] = 0  # TOTAL COUNT
-                    dic_stops[stop_id] = line
+            count = count + 1
+            trip_id = single_stop_time["trip_id"]  # emurate rs_all_trips
+            stop_id = single_stop_time["stop_id"]
+            # query stop_times
+            try:
+                dic_stops[stop_id]
+            except:
+                line = {}
+                line['lat'] = single_stop_time['lat']
+                line['lon'] = single_stop_time['lon']
 
                 for time_walking in range(walking_time_limit):
-                    time_smart = 999  # past_predicted_time + walking_time
+                    line["miss_c_"+str(time_walking)] = 0
+                    line['wt_dif_'+str(time_walking)] = 0 # wait_difference, the difference between waiting time of two scenarios
+                    line['dt_dif_'+str(time_walking)] = 0 # depart_difference, the difference between departure time of two scenarios
 
-                    rs_all_trip_update = db_today_trip_update.find(
-                        {"trip_id": trip_id}, no_cursor_timeout=True)
+                line["totl_c"] = 0  # TOTAL COUNT
+                dic_stops[stop_id] = line
 
-                    time_current = 0
-                    time_current_backup = 0
-                    time_feed = -1
-                    for single_feed in rs_all_trip_update:
-                        time_feed = 0
-                        time_current_backup = time_current
-                        time_current = single_feed["ts"]
-                        for each_stop in single_feed["seq"]:
-                            if each_stop["stop"] == stop_id:
-                                time_current_backup = time_current
-                                time_feed = each_stop["arr"]
-                                break
-                        if time_feed == 0:
-                            break
-                        if time_feed != 0 and time_current + time_walking*60 > time_feed:
-                            time_smart = time_current_backup + time_walking*60
-                            break
-
-                    if time_current + time_walking*60 + buffer > time_feed and time_current + time_walking*60 < time_feed:
-                        time_smart = time_current + time_walking*60
-
-                    time_normal = convert_to_timestamp(
-                        single_stop_time["arrival_time"], single_date, summer_time)  # schedule
-
-                    real_time = list(db_today_real_time.find(
-                        {"stop_id": stop_id, "trip_id": trip_id}))
-
-                    if (len(real_time) == 0):
-                        continue
-                    else:
-                        time_actual = real_time[0]["time"]
-
-                    if (time_smart - time_actual > criteria):
-                        status = 1
-                        dic_stops[stop_id]["M" +
-                                           str(time_walking)] = dic_stops[stop_id]["M"+str(time_walking)]+1
-                    else:
-                        status = 0
-                    dic_stops[stop_id]["T"] = dic_stops[stop_id]["T"]+1
+            time_actual = single_stop_time["time_actual"] # Time for actual transit arrival time, which is the last time you should be 
+            time_normal = single_stop_time["time_normal"] # Time for normal transit users, aka scheduled time follower
+            for time_walking in range(walking_time_limit):
+                time_alt = single_stop_time["time_alt_"+str(time_walking)] # Time for smart transit user's actual onboard time
+                time_smart = single_stop_time["time_smart_"+str(time_walking)] # Time for smart transit users' arrival time at the receiving stop
+                
+                wait_diff = (time_alt - time_smart) - (time_actual - time_normal)
+                depart_diff = (time_alt - time_actual)
+                
+                if time_alt == -1 or time_alt == 9999999999:
+                    print("Doomed: ", stop_id, trip_id)
+                    continue
+                if time_smart > time_actual:
+                    dic_stops[stop_id]["miss_c_"+str(time_walking)]+=1
+                dic_stops[stop_id]['wt_dif_'+str(time_walking)] += wait_diff
+                dic_stops[stop_id]['dt_dif_'+str(time_walking)] += depart_diff
+            dic_stops[stop_id]["totl_c"] += 1
                     
-                    diff_time = time_smart - time_normal
-
-        
 
     location = 'D:\\Luyu\\SmartTransit\\Data\\test.shp'
-    print(location)
+    print("Location: ", location)
     w = shapefile.Writer(location)
     w.field("stop_id", "C")
-    w.field("M0", "N")
-    w.field("M1", "N")
-    w.field("M2", "N")
-    w.field("M3", "N")
-    w.field("M4", "N")
-    w.field("M5", "N")
-    w.field("M6", "N")
-    w.field("M7", "N")
-    w.field("M8", "N")
-    w.field("M9", "N")
+    for time_walking in range(walking_time_limit):
+        w.field("miss_c_" + str(time_walking), "N")
+        w.field("wt_dif_" + str(time_walking), "N")
+        w.field("dt_dif_" + str(time_walking), "N")
     w.field("T", "N")
 
+    evalString = "w.record(key,"
+    for time_walking in range(walking_time_limit):
+        evalString += "value['miss_c_"+str(time_walking)+"'],"
+        evalString += "value['wt_dif_"+str(time_walking)+"'],"
+        evalString += "value['dt_dif_"+str(time_walking)+"'],"
+    evalString += "value['totl_c'])"
+
+
     for key, value in dic_stops.items():
-        w.record(key,  value['M0'], value['M1'], value['M2'], value['M3'], value['M4'], value['M5'], value['M6'], value['M7'],
-                 value['M8'], value['M9'],value['T'])
+        for time_walking in range(walking_time_limit):
+            value['wt_dif_'+str(time_walking)] = value['wt_dif_'+str(time_walking)]/value['totl_c']
+            value['dt_dif_'+str(time_walking)] = value['dt_dif_'+str(time_walking)]/value['totl_c']
+        eval(evalString)
         w.point(float(value['lon']), float(value['lat']))
 
 
 if __name__ == '__main__':
     date_list = []
 
-    start_date1 = date(2018, 5, 2)
-    end_date1 = date(2018, 5, 3)
+    start_date1 = date(2018, 3, 11)
+    end_date1 = date(2018, 3, 12)
 
     analyze_transfer(start_date1, end_date1)

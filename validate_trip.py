@@ -26,7 +26,6 @@ for each_raw in db_time_stamps_set:
     db_time_stamps.append(each_raw)
 db_time_stamps.sort()
 
-
 def find_gtfs_time_stamp(single_date):
     today_seconds = int(
         (single_date - date(1970, 1, 1)).total_seconds()) + 18000
@@ -54,12 +53,11 @@ def sortQuery(A):
     return A["seq"]
 
 
-# main loop
-# enumerate every day in the range
-designated_routes = [1]
 walking_time_limit = 10
-buffer = 120
+buffer = 120 # A assumption number. When user see the expected arrival time is less than 120 seconds, then leave home.
 criteria = 5
+
+is_paralleled = True
 
 
 def analyze_transfer(single_date):
@@ -88,17 +86,19 @@ def analyze_transfer(single_date):
     db_today_trip_update = db_trip_update[today_date]
 
     
-    rs_all_trips = list(db_trips.find({}))
+    rs_all_trips = list(db_trips.find({"service_id":str(service_id)}))
     count = 0
     total_count = len(rs_all_trips)
 
+    print(today_date, ": start.")
     for single_trip in rs_all_trips:
-        print(today_date, count,"/",total_count)
-        count += 1
         trip_id = single_trip["trip_id"]  # emurate rs_all_trips
-        route_id = int(single_trip["route_id"])
+        direction_id = int(single_trip["direction_id"])
+        route_id = int(single_trip["route_id"]) * (-direction_id*2+1) # route number: if direction_id=0 then tag=1; if direction_id=1 then tag=-1;
 
         rs_all_stops = list(db_stop_times.find({"trip_id": trip_id}))
+
+        realtime_error = 0
 
         for single_stop_time in rs_all_stops:
             stop_id = single_stop_time["stop_id"]  # query stop_times
@@ -114,14 +114,11 @@ def analyze_transfer(single_date):
             line['stop_id'] = stop_id
             line['route_id'] = route_id
             line['buffer'] = buffer
-            line['diff_time'] = 0
             line["time_actual"] = 0 # normal users' actual boarding time (bus's actual boarding time)
             line["time_normal"] = 0 # normal users' expected boarding time (bus's scheduled boarding time)
             for time_walking in range(walking_time_limit):
                 line["time_alt_" + str(time_walking)] = 0 # smart users' actual boarding time
                 line["time_smart_" + str(time_walking)] = 0 # smart users' expected boarding time
-
-            line["total_count"] = 0  # TOTAL COUNT
 
             # Time for normal transit users, aka scheduled time follower
             line["time_normal"] = convert_to_timestamp(
@@ -132,6 +129,9 @@ def analyze_transfer(single_date):
                 {"stop_id": stop_id, "trip_id": trip_id}))
 
             if (len(real_time) == 0):
+                line["time_actual"] = "no_realtime_trip"
+                # print("no_realtime_trip: ", stop_id, trip_id, route_id, that_time_stamp)
+                realtime_error+=1
                 continue
             else:
                 line["time_actual"] = real_time[0]["time"]
@@ -146,21 +146,18 @@ def analyze_transfer(single_date):
                     {"trip_id": trip_id}, no_cursor_timeout=True)
 
                 time_current = 0
-                time_current_backup = 0
                 time_feed = -1
                 for single_feed in rs_all_trip_update:
                     time_feed = 0
-                    time_current_backup = time_current
                     time_current = single_feed["ts"]
                     for each_stop in single_feed["seq"]:
                         if each_stop["stop"] == stop_id:
-                            time_current_backup = time_current
                             time_feed = each_stop["arr"]
                             break
                     if time_feed == 0:
-                        break
-                    if time_feed != 0 and time_current + time_walking*60 > time_feed:
-                        line["time_smart_" + str(time_walking)] = time_current_backup + time_walking*60
+                        break                        
+                    if time_current + time_walking*60 + buffer > time_feed and time_current + time_walking*60 < time_feed:
+                        line["time_smart_" + str(time_walking)] = time_current + time_walking*60
                         break
 
                 line["time_alt_" + str(time_walking)] = 9999999999
@@ -169,6 +166,8 @@ def analyze_transfer(single_date):
                 if time_current + time_walking*60 + buffer > time_feed and time_current + time_walking*60 < time_feed:
                     line["time_smart_" + str(time_walking)] = time_current + time_walking*60
                 if line["time_smart_" + str(time_walking)] == 0:
+                    line["time_smart_" + str(time_walking)] == "cannot_find_smart"
+                    #print("cannot_find_smart")
                     continue
      
                 # Time for smart transit user's actual onboard time
@@ -176,6 +175,8 @@ def analyze_transfer(single_date):
                     service_id), "stop_id": stop_id, "route_id": route_id}))
 
                 if len(false_trips_list)==0:
+                    line["time_smart_" + str(time_walking)] == "gtfs_static_error"
+                    #print("gtfs_static_error")
                     continue
 
                 false_trips_list.sort(key=sortQuery)
@@ -183,20 +184,26 @@ def analyze_transfer(single_date):
                 for each_trip in false_trips_list:
                     i_trip_id = each_trip["trip_id"]
                     query_realtime=list(db_today_real_time.find({"stop_id":stop_id,"trip_id":str(i_trip_id)}))
-                    if query_realtime==[]:
+                    if query_realtime==[]: # the i_trip_id didn't exist.
                         continue
                     i_real_time=query_realtime[0]["time"]
                     if line["time_alt_" + str(time_walking)] > i_real_time and i_real_time >= line["time_smart_" + str(time_walking)] - criteria: # relaxed
                         line["time_alt_" + str(time_walking)] = i_real_time
                     
                 if line["time_alt_" + str(time_walking)] == 9999999999:
-                    line["time_alt_" + str(time_walking)] = -1  # there's no an alternative trip.
+                    line["time_alt_" + str(time_walking)] = "critical_trip" # there's no an alternative trip.
             
             trips_collection.append(line)
 
-            if len(trips_collection) ==200:
+            if len(trips_collection) > 200:
                 db_today_smart_transit.insert_many(trips_collection)
                 trips_collection = []
+            
+        #print(today_date, count, total_count, realtime_error, len(rs_all_stops))
+        if count == round(total_count/2, 0):
+            print(today_date, ": half finished.")
+        count += 1
+    print(today_date, ": finished.")
 
 
 if __name__ == '__main__':
@@ -205,10 +212,14 @@ if __name__ == '__main__':
     start_date = date(2018, 1, 31)
     end_date = date(2019, 1, 31)
 
-    cores = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(processes=20)
-    date_range = daterange(start_date, end_date)
-    output=[]
-    output=pool.map(analyze_transfer, date_range)
-    pool.close()
-    pool.join()
+    if is_paralleled:
+        cores = multiprocessing.cpu_count()
+        pool = multiprocessing.Pool(processes=25)
+        date_range = daterange(start_date, end_date)
+        output=[]
+        output=pool.map(analyze_transfer, date_range)
+        pool.close()
+        pool.join()
+    else:
+        test_date = date(2018, 5, 30)
+        analyze_transfer(test_date)
