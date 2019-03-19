@@ -103,15 +103,20 @@ def analyze_transfer(start_date, end_date):
 
                 line["totl_c"] = 0  # TOTAL COUNT
                 dic_stops[stop_id] = line
-
-            time_actual = single_stop_time["time_actual"] # Time for actual transit arrival time, which is the last time you should be 
-            time_normal = single_stop_time["time_normal"] # Time for normal transit users, aka scheduled time follower
+            
+            time_actual = (single_stop_time["time_actual"]) # Time for actual transit arrival time, which is the last time you should be 
+            time_normal = (single_stop_time["time_normal"]) # Time for normal transit users, aka scheduled time follower
             for time_walking in range(walking_time_limit):
-                time_alt = single_stop_time["time_alt_"+str(time_walking)] # Time for smart transit user's actual onboard time
-                time_smart = single_stop_time["time_smart_"+str(time_walking)] # Time for smart transit users' arrival time at the receiving stop
+                time_alt = (single_stop_time["time_alt_"+str(time_walking)]) # Time for smart transit user's actual onboard time
+                time_smart = (single_stop_time["time_smart_"+str(time_walking)]) # Time for smart transit users' arrival time at the receiving stop
                 
-                wait_diff = (time_alt - time_smart) - (time_actual - time_normal)
-                depart_diff = (time_alt - time_actual)
+                try:
+                    wait_diff = (float(time_alt) - float(time_smart)) - (float(time_actual) - float(time_normal))
+                    depart_diff = float(time_alt) - float(time_actual)
+                except:
+                    wait_diff = "no_result"
+                    depart_diff = "no_result"
+                    continue
                 
                 if time_alt == -1 or time_alt == 9999999999:
                     print("Doomed: ", stop_id, trip_id)
@@ -152,7 +157,7 @@ def analyze_transfer(start_date, end_date):
 if __name__ == '__main__':
     date_list = []
 
-    start_date1 = date(2018, 3, 11)
-    end_date1 = date(2018, 3, 12)
+    start_date1 = date(2018, 1, 31)
+    end_date1 = date(2018, 2, 1)
 
     analyze_transfer(start_date1, end_date1)
