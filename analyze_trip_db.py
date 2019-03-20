@@ -125,6 +125,9 @@ def analyze_transfer(start_date, end_date , designated_route):
     
     db_result_route = db_result[str(designated_route)]               
     for key, value in dic_stops.items():
+        for time_walking in range(walking_time_limit):
+            value['wt_dif_'+str(time_walking)] = value['wt_dif_'+str(time_walking)]/value['totl_c']
+            value['dt_dif_'+str(time_walking)] = value['dt_dif_'+str(time_walking)]/value['totl_c']
         db_result_route.insert_one(value)
         
 

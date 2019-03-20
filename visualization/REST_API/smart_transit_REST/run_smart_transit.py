@@ -5,7 +5,7 @@ codeString = '''DOMAIN = {
 
 client = MongoClient("localhost", 27017, maxPoolSize=50)
 
-cols = client.cota_smart_transit.list_collection_names()
+cols = client.cota_smart_transit_result.list_collection_names()
 for todayDate in cols:
     codeString = codeString + "'" + todayDate + "': {'datasource': {" + "'source': '" + todayDate + "'}},"+'''
     '''
@@ -20,7 +20,7 @@ codeString = codeString + '''
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 
-MONGO_DBNAME = 'cota_smart_transit'
+MONGO_DBNAME = 'cota_smart_transit_result'
 
 ALLOW_UNKNOWN=True
 

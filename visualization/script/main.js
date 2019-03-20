@@ -83,9 +83,8 @@ var tran;
 $("#start-btn").click(function () {
   todayDate = $("#date-input").val().replace('-', '').replace('-', '')
   console.log(todayDate)
-  //routeID = $("#route-input").val()
-  routeID = "616223"
-  queryURL = "http://127.0.0.1:5003/" + todayDate + '?where={"trip_id":"' + routeID + "\"}"
+  routeID = $("#route-input").val()
+  queryURL = "http://127.0.0.1:50032/" + routeID
   console.log(queryURL)
 
   $.ajax({
@@ -103,7 +102,7 @@ $("#start-btn").click(function () {
 
       for (var j = 9; j >= 0; j--) {
         for (var i = 0; i < stops.length; i++) {
-          diff_time = stops[i]["time_alt_"+j] - stops[i]["time_smart_"+j] - (stops[i]["time_actual"] - stops[i]["time_normal"])
+          diff_time = stops[i]["wt_dif_"+j]
           L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
             radius: baseRadius * j,
             stroke: true,
