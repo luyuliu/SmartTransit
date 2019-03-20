@@ -71,11 +71,6 @@ def analyze_transfer(start_date, end_date):
         db_today_smart_transit = db_smart_transit[today_date]
 
         that_time_stamp = find_gtfs_time_stamp(single_date)
-        db_stops = db_GTFS[str(that_time_stamp) + "_stops"]
-        db_trips = db_GTFS[str(that_time_stamp) + "_trips"]
-        db_stop_times = db_GTFS[str(that_time_stamp) + "_stop_times"]
-        db_today_real_time = db_real_time["R" + today_date]
-        db_today_trip_update = db_trip_update[today_date]
 
         rs_all_stop_time = list(db_today_smart_transit.find({"route_id" : designated_route}))
 
@@ -128,7 +123,7 @@ def analyze_transfer(start_date, end_date):
             dic_stops[stop_id]["totl_c"] += 1
                     
 
-    location = 'D:\\Luyu\\SmartTransit\\Data\\test.shp'
+    location = 'D:\\Luyu\\SmartTransit\\Data\\test_2.shp'
     print("Location: ", location)
     w = shapefile.Writer(location)
     w.field("stop_id", "C")
