@@ -52,6 +52,8 @@ map = L.map("map", {
   maxZoom: 18
 });
 
+new L.Control.Zoom({ position: 'topright' }).addTo(map);
+
 var arrow = L.polyline([[57, -19], [60, -12]], {}).addTo(map);
 /*
 var arrowHead = L.polylineDecorator(arrow, {
@@ -79,6 +81,12 @@ $(document).ready(function () {
 
 
 var tran;
+
+function zoomIn(){
+  var zoomLevel = parseFloat($("#zoom-input").val())
+  console.log(zoomLevel)
+  map.setZoom(zoomLevel);
+}
 
 $("#start-btn").click(function () {
   todayDate = $("#date-input").val().replace('-', '').replace('-', '')
