@@ -44,7 +44,8 @@ function switchStatus(status, line) {
 
 var baseLayer = L.esri.basemapLayer('Topographic')
 map = L.map("map", {
-  zoom: 13,
+  zoom: 12.5,
+  zoomSnap: 0.25,
   center: [39.98, -83],
   layers: [baseLayer],
   zoomControl: false,
@@ -63,30 +64,41 @@ var arrowHead = L.polylineDecorator(arrow, {
 }).addTo(map);*/
 
 
-stopsLayer = new L.markerClusterGroup({
-  spiderfyOnMaxZoom: true,
-  showCoverageOnHover: false,
-  zoomToBoundsOnClick: true,
-  disableClusteringAtZoom: 15,
-});
-
-
-
-
 $(document).ready(function () {
   $('#date-input').val(("2018-01-31"))
 })
 
 
-
+$(function() {
+  $("form").submit(function() { return false; });
+});
 
 var tran;
 
-function zoomIn(){
-  var zoomLevel = parseFloat($("#zoom-input").val())
-  console.log(zoomLevel)
-  map.setZoom(zoomLevel);
+function zoomIn(e) {
+  if (event.key === 'Enter') {
+    var zoomLevel = parseFloat(e.value)
+    console.log(zoomLevel)
+    map.setZoom(zoomLevel);
+
+  }
 }
+
+L.control.browserPrint({
+  printModes: ["Portrait", "Landscape", "Auto", "Custom"],
+  position: "topright"
+}).addTo(map);
+
+
+$("#snap-btn").click(function(){
+  $("#status").html("Running...")
+  
+});
+
+$("#down-btn").click(function(){
+  
+});
+
 
 $("#start-btn").click(function () {
   todayDate = $("#date-input").val().replace('-', '').replace('-', '')
@@ -110,7 +122,7 @@ $("#start-btn").click(function () {
 
       for (var j = 9; j >= 0; j--) {
         for (var i = 0; i < stops.length; i++) {
-          diff_time = stops[i]["wt_dif_"+j]
+          diff_time = stops[i]["wt_dif_" + j]
           L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
             radius: baseRadius * j,
             stroke: true,
@@ -127,20 +139,20 @@ $("#start-btn").click(function () {
 
 });
 
-var colorRamp=[-Infinity, -80, -46, -13, 0, 43 , Infinity]
-var colorCode=["#0080FF", "#5CAEA2" , "#B9DC45", "#FFDC00", "#FF9700", "#FF2000"]
+var colorRamp = [-Infinity, -80, -46, -13, 0, 43, Infinity]
+var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000"]
 
-function returnColor(value, colorRamp, colorCode){
-  for (var i = 1; i<colorRamp.length; i++){
-    if (value >= colorRamp[i-1] && value < colorRamp[i]){
-      return colorCode[i-1]
+function returnColor(value, colorRamp, colorCode) {
+  for (var i = 1; i < colorRamp.length; i++) {
+    if (value >= colorRamp[i - 1] && value < colorRamp[i]) {
+      return colorCode[i - 1]
     }
-    else{
+    else {
       continue;
     }
   }
   console.log(value)
-  return 
+  return
 }
 
 

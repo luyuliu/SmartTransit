@@ -24,11 +24,8 @@
 	<!-- Load Bootstrap -->
 	<script src="./js/bootstrap.min.js"></script>
 
-	<!-- awesomemarkers -->
-	<script src="./js/leaflet.awesome-markers.min.js"></script>
+	<script src="./js/leaflet.browser.print.min.js"></script>
 
-	<!-- cluster -->
-	<script src="./js/leaflet.markercluster.js"></script>
 
 	<!-- Load css-->
 	<link rel="stylesheet" href="./css/leaflet.awesome-markers.css">
@@ -36,9 +33,6 @@
 	<link rel="stylesheet" href="./css/bootstrap.css">
 	<link rel="stylesheet" href="./css/leaflet.css">
 	<link rel="stylesheet" href="./css/bootleaf.css">
-	<link rel="stylesheet" href="./css/MarkerCluster.css">
-	<link rel="stylesheet" href="./css/MarkerCluster.Default.css">
-
 </head>
 
 <body>
@@ -83,11 +77,15 @@
 							</form>
 							<form method="get">
 								Zoom:
-								<input type="text" id="zoom-input" value="12.5" onkeydown="zoomIn()" />
+								<input type="text" id="zoom-input" value="12.5" onkeydown="zoomIn(this)" />
 							</form>
+							<!-- <form method="get">
+								<h4 id="status">Preparing.</h4>
+							</form> -->
 
 							<button id="start-btn" type="button" class="btn btn-primary btn">Start</button>
-
+							<!-- <button id="snap-btn" type="button" class="btn btn-primary btn">Snap</button> -->
+							<!-- <button id="down-btn" type="button" class="btn btn-primary btn">Download</button> -->
 						</div>
 					</div>
 				</div>
@@ -111,7 +109,10 @@
 														<th>Chevron</th>
 														<tr>
 								</thead>
-								<tbody id="POI-list" class="list"></tbody>
+								<tbody id="POI-list" class="list">
+
+
+								</tbody>
 							</table>
 						</div>
 
