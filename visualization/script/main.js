@@ -139,7 +139,7 @@ $("#start-btn").click(function () {
 
 });
 
-var colorRamp = [-Infinity, -80, -46, -13, 0, 43, Infinity]
+var colorRamp = [-Infinity, -80, -46, -13, 0, 43, Infinity] // red is waiting more time; blue is saving more time
 var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000"]
 
 function returnColor(value, colorRamp, colorCode) {
