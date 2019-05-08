@@ -7,7 +7,7 @@ client = MongoClient('mongodb://localhost:27017/')
 db_GTFS = client.cota_gtfs
 db_real_time = client.cota_real_time
 db_trip_update = client.trip_update
-db_smart_transit = client.cota_smart_transit
+db_smart_transit = client.cota_pr_optimization
 
 
 def daterange(start_date, end_date):
@@ -53,14 +53,14 @@ def sortQuery(A):
     return A["seq"]
 
 
-walking_time_limit = 10
-buffer = 120 # A assumption number. When user see the expected arrival time is less than 120 seconds, then leave home.
+walking_time_limit = 10 # A assumption number. When user see the expected arrival time is less than 120 seconds, then leave home.
 criteria = 5
 
 is_paralleled = False
 
 
-def analyze_transfer(single_date):
+def analyze_transfer(buffer):
+    single_date = date(2018, 2, 8)
     trips_collection = []
     if (single_date - date(2018, 3, 10)).total_seconds() <= 0 or (single_date - date(2018, 11, 3)).total_seconds() > 0:
         summer_time = 0
@@ -75,7 +75,7 @@ def analyze_transfer(single_date):
         service_id = 2
     else:
         service_id = 3
-    db_today_smart_transit = db_smart_transit[today_date]
+    db_today_smart_transit = db_smart_transit[today_date+"_"+str(buffer)]
 
     that_time_stamp = find_gtfs_time_stamp(single_date)
     db_stops = db_GTFS[str(that_time_stamp) + "_stops"]
@@ -86,7 +86,7 @@ def analyze_transfer(single_date):
     db_today_trip_update = db_trip_update[today_date]
 
     
-    rs_all_trips = list(db_trips.find({"service_id":str(service_id)}))
+    rs_all_trips = list(db_trips.find({"service_id":str(service_id), "route_id": "002"})) # Control the size of sampling
     count = 0
     total_count = len(rs_all_trips)
 
@@ -99,6 +99,9 @@ def analyze_transfer(single_date):
         rs_all_stops = list(db_stop_times.find({"trip_id": trip_id}))
 
         realtime_error = 0
+        
+        rs_all_trip_update = db_today_trip_update.find(
+                {"trip_id": trip_id}, no_cursor_timeout=True) # All GTFS real-time feed
 
         for single_stop_time in rs_all_stops:
             stop_id = single_stop_time["stop_id"]  # query stop_times
@@ -120,11 +123,11 @@ def analyze_transfer(single_date):
                 line["time_alt_" + str(time_walking)] = 0 # smart users' actual boarding time
                 line["time_smart_" + str(time_walking)] = 0 # smart users' expected boarding time
 
-            # Time for normal transit users, aka scheduled time follower
+            ### Time Normal: Time for normal transit users, aka scheduled time follower
             line["time_normal"] = convert_to_timestamp(
                 single_stop_time["arrival_time"], single_date, summer_time)  # schedule
 
-            # Time for actual transit arrival time, which is the last time you should be 
+            ### Time Actual: Time for actual transit arrival time, which is the last time you should be 
             real_time = list(db_today_real_time.find(
                 {"stop_id": stop_id, "trip_id": trip_id}))
 
@@ -138,16 +141,15 @@ def analyze_transfer(single_date):
 
 
 
-
             for time_walking in range(walking_time_limit):
+                ### Time Smart
                 line["time_smart_" + str(time_walking)] = 0  # past_predicted_time + walking_time
 
-                rs_all_trip_update = db_today_trip_update.find(
-                    {"trip_id": trip_id}, no_cursor_timeout=True)
+                
 
                 time_current = 0
                 time_feed = -1
-                for single_feed in rs_all_trip_update:
+                for single_feed in rs_all_trip_update: # The simulation process of finding pathes in RTA. To find the suffcient current time to leave.
                     time_feed = 0
                     time_current = single_feed["ts"]
                     for each_stop in single_feed["seq"]:
@@ -156,13 +158,14 @@ def analyze_transfer(single_date):
                             break
                     if time_feed == 0:
                         break                        
-                    if time_current + time_walking*60 + buffer > time_feed and time_current + time_walking*60 < time_feed:
+                    if time_current + time_walking*60 + buffer >= time_feed: # If the current ETA plus the Insurance buffer is equal to or greater than the buses' ETA, then go.
                         line["time_smart_" + str(time_walking)] = time_current + time_walking*60
                         break
 
+
+                ### Time Alt Time for smart transit users' arrival time at the receiving stop
                 line["time_alt_" + str(time_walking)] = 9999999999
 
-                # Time for smart transit users' arrival time at the receiving stop
                 if time_current + time_walking*60 + buffer > time_feed and time_current + time_walking*60 < time_feed:
                     line["time_smart_" + str(time_walking)] = time_current + time_walking*60
                 if line["time_smart_" + str(time_walking)] == 0:
@@ -208,9 +211,12 @@ def analyze_transfer(single_date):
 
 if __name__ == '__main__':
     date_list = []
+    
+    insurance_buffers = range(0, 301, 10)
 
     start_date = date(2018, 1, 31)
     end_date = date(2019, 1, 31)
+    test_date = date(2018, 2, 1)
 
     if is_paralleled:
         cores = multiprocessing.cpu_count()
@@ -221,5 +227,9 @@ if __name__ == '__main__':
         pool.close()
         pool.join()
     else:
-        test_date = date(2018, 2, 1)
-        analyze_transfer(test_date)
+        cores = multiprocessing.cpu_count()
+        pool = multiprocessing.Pool(processes=31)
+        output=[]
+        output=pool.map(analyze_transfer, insurance_buffers)
+        pool.close()
+        pool.join()
