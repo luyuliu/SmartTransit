@@ -109,15 +109,19 @@ def analyze_transfer(buffer):
         
         expected_stop_times_list = {} # First key: stop, second key: T_cu. Value: T_ex
         for single_feed in rs_all_trip_update: # Todo
-            line 
-            time_feed = 0
             time_current = single_feed["ts"]
             for each_stop in single_feed["seq"]:
-                if each_stop["stop"] == stop_id:
-                    time_feed = each_stop["arr"]
-                    break
-            if time_feed == 0:
-                break
+                try:
+                    expected_stop_times_list[each_stop['stop']]
+                except:
+                    expected_stop_times_list[each_stop['stop']] = {}
+                
+                try:
+                    expected_stop_times_list[each_stop['stop']][time_current]
+                except:
+                    expected_stop_times_list[each_stop['stop']][time_current] = each_stop["arr"]
+                else:
+                    expected_stop_times_list[each_stop['stop']][time_current] = each_stop["arr"]
 
         for single_stop_time in rs_all_stops:
             stop_id = single_stop_time["stop_id"]  # query stop_times
@@ -190,15 +194,7 @@ def analyze_transfer(buffer):
                 time_feed = -1
 
                 # The simulation process of finding pathes in RTA. To find the suffcient current time to leave.
-                for single_feed in rs_all_trip_update:
-                    time_feed = 0
-                    time_current = single_feed["ts"]
-                    for each_stop in single_feed["seq"]:
-                        if each_stop["stop"] == stop_id:
-                            time_feed = each_stop["arr"]
-                            break
-                    if time_feed == 0:
-                        break
+                for time_current, time_feed in expected_stop_times_list[stop_id].items():
                     # If the current ETA plus the Insurance buffer is equal to or greater than the buses' ETA, then go.
                     if time_current + time_walking*60 + buffer >= time_feed:
                         line["time_smart_" +
