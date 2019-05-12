@@ -139,6 +139,46 @@ $("#start-btn").click(function () {
 
 });
 
+
+$("#start-opt-btn").click(function () {
+  todayDate = $("#date-pr-input").val().replace('-', '').replace('-', '')
+  console.log(todayDate)
+  routeID = $("#route-input").val()
+  queryURL = "http://127.0.0.1:50032/" + todayDate + "_opt"
+  console.log(queryURL)
+
+  $.ajax({
+    url: queryURL,
+    type: "GET",
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-Content-Type-Options', 'nosniff');
+    },
+    success: function (rawstops) {
+      stops = rawstops._items
+      console.log(stops)
+
+      baseRadius = 84;
+
+      for (var j = 9; j >= 0; j--) {
+        for (var i = 0; i < stops.length; i++) {
+          diff_time = stops[i]["wt_dif_" + j]
+          L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
+            radius: baseRadius * j,
+            stroke: true,
+            weight: 0.2,
+            color: "#000000",
+            fillOpacity: 1,
+            fillColor: returnColor(diff_time, colorRamp, colorCode)
+          }).addTo(map);
+
+        }
+      }
+    }
+  });
+
+});
+
 var colorRamp = [-Infinity, -80, -46, -13, 0, 43, Infinity] // red is waiting more time; blue is saving more time
 var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000"]
 

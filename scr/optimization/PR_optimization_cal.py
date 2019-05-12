@@ -8,7 +8,7 @@ db_GTFS = client.cota_gtfs
 db_real_time = client.cota_real_time
 db_trip_update = client.trip_update
 db_smart_transit = client.cota_pr_optimization
-
+db_opt_result = client.cota_pr_optimization_result
 
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
@@ -61,7 +61,6 @@ is_paralleled = False
 
 def analyze_transfer(single_date):
     today_date = single_date.strftime("%Y%m%d")  # date
-    db_pr_optimization_result = db_smart_transit[today_date+"_result"]
     
     insurance_buffers = range(0, 301, 10)
 
@@ -71,7 +70,7 @@ def analyze_transfer(single_date):
         print("Start: "+ today_date +" - ",each_buffer)
         db_today_smart_transit = db_smart_transit[today_date+"_"+str(each_buffer)]
         each_buffer_trip_collection = list(db_today_smart_transit.find({}))
-        if each_buffer == 0:
+        if each_buffer == insurance_buffers[0]:
             records_dic = each_buffer_trip_collection
             for each_record in records_dic:
                 for walking_time in range(walking_time_limit):
@@ -92,7 +91,7 @@ def analyze_transfer(single_date):
                         records_dic[index]["optima_buffer_"+str(walking_time)] = each_buffer
     
     print("Start: "+ today_date +" - Database insert.")
-    db_pr_optimization_result.insert_many(records_dic)
+    db_opt_result[today_date+"_opt"].insert_many(records_dic)
     
 
 

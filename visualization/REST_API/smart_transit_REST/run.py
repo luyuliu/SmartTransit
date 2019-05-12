@@ -1,7 +1,9 @@
 import run_smart_transit
+from pymongo import MongoClient
 
 from eve import Eve
-app = Eve(settings='setting.py')
 
 if __name__ == '__main__':
-    app.run(port=50032)
+    run_smart_transit.generateSettingFile("cota_smart_transit")
+    app = Eve(settings='setting.py')
+    app.run(port=50031)

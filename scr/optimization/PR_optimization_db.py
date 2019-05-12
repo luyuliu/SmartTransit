@@ -26,6 +26,9 @@ for each_raw in db_time_stamps_set:
     db_time_stamps.append(each_raw)
 db_time_stamps.sort()
 
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)
 
 def find_gtfs_time_stamp(single_date):
     today_seconds = int(
@@ -62,8 +65,8 @@ criteria = 5
 is_paralleled = False
 
 
-def analyze_transfer(buffer):
-    single_date = date(2018, 2, 1)
+def analyze_transfer(buffer, each_date):
+    single_date = each_date
     trips_collection = []
     if (single_date - date(2018, 3, 10)).total_seconds() <= 0 or (single_date - date(2018, 11, 3)).total_seconds() > 0:
         summer_time = 0
@@ -242,9 +245,8 @@ if __name__ == '__main__':
 
     insurance_buffers = range(0, 301, 10)
 
-    start_date = date(2018, 1, 31)
+    start_date = date(2018, 9, 20)
     end_date = date(2019, 1, 31)
-    test_date = date(2018, 2, 1)
 
     if is_paralleled:
         cores = multiprocessing.cpu_count()
@@ -255,9 +257,10 @@ if __name__ == '__main__':
         pool.close()
         pool.join()
     else:
-        cores = multiprocessing.cpu_count()
-        pool = multiprocessing.Pool(processes=31)
-        output = []
-        output = pool.map(analyze_transfer, insurance_buffers)
-        pool.close()
-        pool.join()
+        for each_date in daterange(start_date, end_date):
+            cores = multiprocessing.cpu_count()
+            pool = multiprocessing.Pool(processes=31)
+            output = []
+            output = pool.starmap(analyze_transfer, zip(insurance_buffers,[each_date]*len(insurance_buffers)))
+            pool.close()
+            pool.join()

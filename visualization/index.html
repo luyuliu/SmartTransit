@@ -56,7 +56,7 @@
 				<div class="panel-group" id="accordion1" role="tablist" aria-multiselectable="true">
 					<div class="panel panel-default" style="margin:0">
 						<div class="panel-heading" role="tab" id="headingOne0" style="margin:0">
-							<a class="panel-title" data-toggle="collapse" data-parent="#accordion" href="#collapseOne0" aria-expanded="true" aria-controls="collapseOne0">Setting
+							<a class="panel-title" data-toggle="collapse" data-parent="#accordion" href="#collapseOne0" aria-expanded="true" aria-controls="collapseOne0">Waiting time Difference
 								<button type="button" class="btn btn-xs btn-default pull-right" title="Click to hide sidebar" id="sidebar-hide-btn">
 									<i class="fa fa-chevron-left"></i>
 								</button>
@@ -89,6 +89,38 @@
 						</div>
 					</div>
 				</div>
+
+				<div class="panel-group" id="accordion2" role="tablist" aria-multiselectable="true">
+					<div class="panel panel-default" style="margin:0">
+						<div class="panel-heading" role="tab" id="headingOne1" style="margin:0">
+							<a class="panel-title" data-toggle="collapse" data-parent="#accordion" href="#collapseOne1" aria-expanded="true" aria-controls="collapseOne1">PR optimization result
+								
+							</a>
+						</div>
+
+
+					</div>
+					<div id="collapseOne1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne0" style="margin:0">
+						<div class="panel-body">
+							<form method="get">
+								Date:
+								<input type="date" id="date-pr-input" />
+							</form>
+							<form method="get">
+								Route:
+								<input type="text" id="route-pr-input" value="2" />
+							</form>
+							<!-- <form method="get">
+								<h4 id="status">Preparing.</h4>
+							</form> -->
+
+							<button id="start-opt-btn" type="button" class="btn btn-primary btn">Start</button>
+							<!-- <button id="snap-btn" type="button" class="btn btn-primary btn">Snap</button> -->
+							<!-- <button id="down-btn" type="button" class="btn btn-primary btn">Download</button> -->
+						</div>
+					</div>
+				</div>
+
 
 				<div class="panel panel-default" style="margin:0">
 					<div class="panel-heading" role="tab" id="headingOne1" style="margin:0">
