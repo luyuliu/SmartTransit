@@ -1,5 +1,6 @@
 DOMAIN = {
     '20180201_opt': {'datasource': {'source': '20180201_opt'}},
+        '20180201_route_reduced': {'datasource': {'source': '20180201_route_reduced'}},
         }
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017

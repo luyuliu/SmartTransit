@@ -53,7 +53,7 @@ def sortQuery(A):
     return A["seq"]
 
 
-walking_time_limit = 10 # A assumption number. When user see the expected arrival time is less than 120 seconds, then leave home.
+walking_time_limit = 10
 criteria = 5
 
 is_paralleled = False

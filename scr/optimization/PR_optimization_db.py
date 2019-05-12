@@ -57,8 +57,6 @@ def convert_to_timestamp(time_string, single_date, summer_time):
 def sortQuery(A):
     return A["seq"]
 
-
-# A assumption number. When user see the expected arrival time is less than 120 seconds, then leave home.
 walking_time_limit = 10
 criteria = 5
 
