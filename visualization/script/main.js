@@ -42,7 +42,7 @@ function switchStatus(status, line) {
 }
 
 
-var baseLayer = L.esri.basemapLayer('Topographic')
+var baseLayer = L.esri.basemapLayer('Gray')
 map = L.map("map", {
   zoom: 12.5,
   zoomSnap: 0.25,
@@ -167,8 +167,6 @@ $("#start-opt-btn").click(function () {
     success: function (rawstops) {
       var stops = rawstops._items
       console.log(stops)
-
-
       visualization(stops, variableCode);
     }
   });
