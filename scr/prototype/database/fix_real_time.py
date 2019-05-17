@@ -40,3 +40,6 @@ if __name__ == "__main__":
             insert_query = {"_id": each_record["_id"]}
             try:
                 result_trip = db_trips.find({"trip_id": trip_id})[0]
+            except:
+                print("trip_error")
+                trip_seq = 
