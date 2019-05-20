@@ -56,4 +56,3 @@ def analyze_transfer(start_date, end_date):
 
 if __name__ == '__main__':
     analyze_transfer(date(2018, 2, 1), date(2019, 2, 1))
-    
