@@ -40,3 +40,6 @@ def convert_to_timestamp(time_string, single_date, summer_time):
         (single_date - date(1970, 1, 1)).total_seconds()) + 18000 - summer_time*3600
 
     return total_second+today_seconds
+
+def sortQuery(A):
+    return A["seq"]

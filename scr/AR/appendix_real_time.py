@@ -47,6 +47,8 @@ def appendix_real_time(single_date):
     total_count = col_real_time.estimated_document_count()
     count = 0
     for each_record in rl_real_time:
+        if len(each_record) == 14:
+            continue
         trip_id = each_record["trip_id"]
         stop_id = each_record["stop_id"]
         rid = each_record["_id"]
@@ -99,7 +101,8 @@ def appendix_real_time(single_date):
         trip_seq_query = list(db_seq.find(
             {"trip_id": trip_id, "stop_id": stop_id}))
         if len(trip_seq_query) == 0:
-            pass
+            trip_sequence = "GTFS_error"
+            scheduled_time = "GTFS_error"
         else:
             trip_seq_query = trip_seq_query[0]
             trip_sequence = trip_seq_query["seq"]
@@ -122,20 +125,20 @@ def appendix_real_time(single_date):
         count += 1
         if count % 1000 == 1:
             print(today_date, ": ", count/total_count*100)
-    print(today_date, ": Start.")
+    print(today_date, ": Done.")
 
 
 if __name__ == "__main__":
     start_date = date(2018, 1, 29)
-    end_date = date(2018, 1, 30)
+    end_date = date(2019, 1, 30)
 
-    appendix_real_time(start_date)
-    # col_list_real_time = transfer_tools.daterange(start_date, end_date)
+    # appendix_real_time(start_date)
+    col_list_real_time = transfer_tools.daterange(start_date, end_date)
 
-    # cores = int(multiprocessing.cpu_count()/3*2)
-    # pool = multiprocessing.Pool(processes=cores)
-    # date_range = transfer_tools.daterange(start_date, end_date)
-    # output = []
-    # output = pool.map(appendix_real_time, date_range)
-    # pool.close()
-    # pool.join()
+    cores = int(multiprocessing.cpu_count()/4*3)
+    pool = multiprocessing.Pool(processes=cores)
+    date_range = transfer_tools.daterange(start_date, end_date)
+    output = []
+    output = pool.map(appendix_real_time, date_range)
+    pool.close()
+    pool.join()

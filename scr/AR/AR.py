@@ -58,6 +58,17 @@ def analyze_transfer(single_date):
     error_count = 0
 
     total_count = len(result_real_time)
+    pre_count = db_result[today_date].estimated_document_count()
+    if pre_count==total_count:
+        print(today_date + " - Skip.")
+        return False
+    else:
+        if pre_count!= 0:
+            db_result[today_date].drop()
+            print(today_date + " - Drop.")
+        else:
+            print(today_date + " - Start.")
+
     for each_record in result_real_time:
         trip_id = each_record["trip_id"]
         stop_id = each_record["stop_id"]
@@ -65,37 +76,41 @@ def analyze_transfer(single_date):
         time = each_record["time"]
         # Not stop_sequence, not real-time seq, the trip sequence array's trip_sequence
         sequence_id = each_record["trip_sequence"]
-        alt_query = list(db_today_real_time.find(
-            {"stop_id": stop_id, "trip_sequence": sequence_id - 1, "route_id": route_id}))
-        if len(alt_query) == 0:
-            alt_schedule = list(db_seq.find(
-                {"service_id": service_id, "stop_id": stop_id, "seq": sequence_id - 1, "route_id": route_id}))
-
-            if len(alt_schedule) == 0:
-                if sequence_id != 0:
-                    print(route_id, stop_id, trip_id, sequence_id)
-                    rand_time = "GTFS_error"
-                    error_count += 1
-                else:
-                    alt_query = "pre_critical_trip"
-                    rand_time = "pre_critical_trip"
-                    precrit_count += 1
-            else:
-                alt_schedule = alt_schedule[0]
-                alt_time = alt_schedule["time"] + today_seconds
-                rand_time = (time + alt_time)/2
-                schedule_count += 1
-
+        if type(sequence_id) is not int:
+            rand_time = "GTFS_error"
+            error_count += 1
         else:
-            alt_query = alt_query[0]
-            alt_time = alt_query["time"]
-            rand_time = (time + alt_time)/2
+            alt_query = list(db_today_real_time.find(
+                {"stop_id": stop_id, "trip_sequence": sequence_id - 1, "route_id": route_id}))
+            if len(alt_query) == 0:
+                alt_schedule = list(db_seq.find(
+                    {"service_id": service_id, "stop_id": stop_id, "seq": sequence_id - 1, "route_id": route_id}))
+
+                if len(alt_schedule) == 0:
+                    if sequence_id != 0:
+                        # print(route_id, stop_id, trip_id, sequence_id)
+                        rand_time = "GTFS_error"
+                        error_count += 1
+                    else:
+                        alt_query = "pre_critical_trip"
+                        rand_time = "pre_critical_trip"
+                        precrit_count += 1
+                else:
+                    alt_schedule = alt_schedule[0]
+                    alt_time = alt_schedule["time"] + today_seconds
+                    rand_time = (time + alt_time)/2
+                    schedule_count += 1
+
+            else:
+                alt_query = alt_query[0]
+                alt_time = alt_query["time"]
+                rand_time = (time + alt_time)/2
 
         each_record['rand_time'] = rand_time
         each_record.pop('_id', None)
         db_result[today_date].insert_one(each_record)
         count += 1
-        if count % 100 == 1:
+        if count % 70000 == 1:
             print(today_date, ": ", count/total_count*100, "|", count -
                   precrit_count-schedule_count,  "|", schedule_count, "|", precrit_count, "|", error_count)
 
@@ -103,4 +118,17 @@ def analyze_transfer(single_date):
 
 
 if __name__ == '__main__':
-    analyze_transfer(date(2018, 2, 2))
+    # analyze_transfer(date(2018, 2, 2))
+    start_date = date(2018, 1, 29)
+    end_date = date(2019, 1, 30)
+
+    # appendix_real_time(start_date)
+    col_list_real_time = transfer_tools.daterange(start_date, end_date)
+
+    cores = int(multiprocessing.cpu_count()/4*3)
+    pool = multiprocessing.Pool(processes=cores)
+    date_range = transfer_tools.daterange(start_date, end_date)
+    output = []
+    output = pool.map(analyze_transfer, date_range)
+    pool.close()
+    pool.join()
