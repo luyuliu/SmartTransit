@@ -120,20 +120,22 @@ def appendix_real_time(single_date):
 
         col_real_time.update_one(original_query, update_object)
         count += 1
-        if count % 70000 == 1:
+        if count % 1000 == 1:
             print(today_date, ": ", count/total_count*100)
     print(today_date, ": Start.")
 
 
 if __name__ == "__main__":
-    start_date = date(2018, 1, 31)
-    end_date = date(2019, 1, 31)
-    col_list_real_time = transfer_tools.daterange(start_date, end_date)
+    start_date = date(2018, 1, 29)
+    end_date = date(2018, 1, 30)
 
-    cores = int(multiprocessing.cpu_count()/3*2)
-    pool = multiprocessing.Pool(processes=cores)
-    date_range = transfer_tools.daterange(start_date, end_date)
-    output = []
-    output = pool.map(appendix_real_time, date_range)
-    pool.close()
-    pool.join()
+    appendix_real_time(start_date)
+    # col_list_real_time = transfer_tools.daterange(start_date, end_date)
+
+    # cores = int(multiprocessing.cpu_count()/3*2)
+    # pool = multiprocessing.Pool(processes=cores)
+    # date_range = transfer_tools.daterange(start_date, end_date)
+    # output = []
+    # output = pool.map(appendix_real_time, date_range)
+    # pool.close()
+    # pool.join()

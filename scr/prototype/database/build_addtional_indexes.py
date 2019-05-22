@@ -1,6 +1,10 @@
 import pymongo
 from datetime import timedelta, date
 import time
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import transfer_tools
 
 def convertSeconds(BTimeString):
     time = BTimeString.split(":")
@@ -32,7 +36,10 @@ for each_time_stamp in db_time_stamps:
     db_stops=db_GTFS[str(each_time_stamp)+"_stops"]
     db_stop_times=db_GTFS[str(each_time_stamp)+"_stop_times"]
     db_trips=db_GTFS[str(each_time_stamp)+"_trips"]
+    db_seq = db_GTFS[str(each_time_stamp) + "_trip_seq"]
 
-    #db_stop_times.create_index([("trip_id", pymongo.ASCENDING)])
-    #db_stops.create_index([("stop_id", pymongo.ASCENDING)])
-    db_trips.create_index([("service_id", pymongo.ASCENDING)])
+    db_stop_times.create_index([("trip_id", pymongo.ASCENDING),("stop_id", pymongo.ASCENDING)])
+    db_seq.create_index([("trip_id", pymongo.ASCENDING),("stop_id", pymongo.ASCENDING)])
+    db_stops.create_index([("stop_id", pymongo.ASCENDING)])
+    db_trips.create_index([("service_id", pymongo.ASCENDING), ("trip_id", pymongo.ASCENDING)])
+
