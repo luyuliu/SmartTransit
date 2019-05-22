@@ -4,7 +4,7 @@ import time
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import transfer_tools
+# import transfer_tools
 
 def convertSeconds(BTimeString):
     time = BTimeString.split(":")
@@ -40,6 +40,7 @@ for each_time_stamp in db_time_stamps:
 
     db_stop_times.create_index([("trip_id", pymongo.ASCENDING),("stop_id", pymongo.ASCENDING)])
     db_seq.create_index([("trip_id", pymongo.ASCENDING),("stop_id", pymongo.ASCENDING)])
+    db_seq.create_index([("service_id", pymongo.ASCENDING),("seq", pymongo.ASCENDING),("route_id", pymongo.ASCENDING),("stop_id", pymongo.ASCENDING)])
     db_stops.create_index([("stop_id", pymongo.ASCENDING)])
     db_trips.create_index([("service_id", pymongo.ASCENDING), ("trip_id", pymongo.ASCENDING)])
 
