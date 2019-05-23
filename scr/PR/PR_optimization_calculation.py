@@ -204,19 +204,19 @@ if __name__ == '__main__':
 
     insurance_buffers = range(0, 301, 10)
 
-    start_date = date(2018, 9, 21)
+    start_date = date(2018, 11, 17)
     end_date = date(2019, 1, 31)
 
     if is_paralleled:
         cores = multiprocessing.cpu_count()
         pool = multiprocessing.Pool(processes=25)
-        date_range = daterange(start_date, end_date)
+        date_range = transfer_tools.daterange(start_date, end_date)
         output = []
         output = pool.map(analyze_transfer, date_range)
         pool.close()
         pool.join()
     else:
-        for each_date in daterange(start_date, end_date):
+        for each_date in transfer_tools.daterange(start_date, end_date):
             cores = multiprocessing.cpu_count()
             pool = multiprocessing.Pool(processes=31)
             output = []
