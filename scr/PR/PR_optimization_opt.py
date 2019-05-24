@@ -30,9 +30,17 @@ def analyze_transfer(single_date):
     insurance_buffers = range(0, 301, 10)
 
     records_dic=[] # Avoid IO. But could be bad for small memory.
+    print(today_date +" - Initialization.")
+
+    pre_count = db_opt_result[today_date+"_opt"].estimated_document_count()
+    count = db_smart_transit[today_date+"_0"].estimated_document_count()
+
+    if count == pre_count:
+        print(today_date + " - Skip.")
+        return False
 
     for each_buffer in insurance_buffers:    
-        print("Start: "+ today_date +" - ",each_buffer)
+        
         db_today_smart_transit = db_smart_transit[today_date+"_"+str(each_buffer)]
         each_buffer_trip_collection = list(db_today_smart_transit.find({}))
         if each_buffer == insurance_buffers[0]:
@@ -55,8 +63,11 @@ def analyze_transfer(single_date):
                         records_dic[index]["time_smart_"+str(walking_time)] = each_buffer_trip_collection[index]["time_smart_"+str(walking_time)]
                         records_dic[index]["optima_buffer_"+str(walking_time)] = each_buffer
     
-    print("Start: "+ today_date +" - Database insert.")
-    db_opt_result[today_date+"_opt"].insert_many(records_dic)
+    if len(records_dic)!= 0:
+        db_opt_result[today_date+"_opt"].insert_many(records_dic)
+        print(today_date +" - Database insert.")
+    else:
+        print(today_date +" - Skip.")
     
 
 
@@ -64,14 +75,16 @@ if __name__ == '__main__':
     # single_date = date(2018, 2, 1)
     # analyze_transfer(single_date)
     
-    start_date = date(2018, 1, 29)
+    start_date = date(2018, 2, 2)
     end_date = date(2019, 1, 31)
 
     cores = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(processes=35)
+    pool = multiprocessing.Pool(processes=25)
     date_range = transfer_tools.daterange(start_date, end_date)
     output = []
     output = pool.map(analyze_transfer, date_range)
     pool.close()
     pool.join()
     
+    # for single_date in transfer_tools.daterange(start_date, end_date):
+    #     analyze_transfer(single_date)

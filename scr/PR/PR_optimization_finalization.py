@@ -61,7 +61,7 @@ def calculate_parameters(start_date, end_date):
             else:
                 for walking_time in range(walking_time_limit):
                     records_dic[trip_id][stop_id]["sum_buff_"+str(walking_time)] += each_record["optima_buffer_"+str(walking_time)]
-                    records_dic[trip_id][stop_id]["max_buff_"+str(walking_time)] = max(each_record["optima_buffer_"+str(walking_time)], records_dic[route_id][stop_id]["max_buff_"+str(walking_time)])
+                    records_dic[trip_id][stop_id]["max_buff_"+str(walking_time)] = max(each_record["optima_buffer_"+str(walking_time)], records_dic[trip_id][stop_id]["max_buff_"+str(walking_time)])
                 records_dic[trip_id][stop_id]["date_count"] += 1
             
     print(today_date +" - Database insert.")
