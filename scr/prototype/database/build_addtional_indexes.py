@@ -1,47 +1,34 @@
-import pymongo
+from pymongo import MongoClient
+from pymongo import ASCENDING
 from datetime import timedelta, date
 import time
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# import transfer_tools
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import transfer_tools
 
-def convertSeconds(BTimeString):
-    time = BTimeString.split(":")
-    hours = int(time[0])
-    minutes = int(time[1])
-    seconds = int(time[2])
-    return hours * 3600 + minutes * 60 + seconds
+client = MongoClient('mongodb://localhost:27017/')
 
-def sortArray(a):
-    return a["time"]
+for each_time_stamp in transfer_tools.db_time_stamps:
+    db_stops=transfer_tools.db_GTFS[str(each_time_stamp)+"_stops"]
+    db_stop_times=transfer_tools.db_GTFS[str(each_time_stamp)+"_stop_times"]
+    db_trips=transfer_tools.db_GTFS[str(each_time_stamp)+"_trips"]
+    db_seq = transfer_tools.db_GTFS[str(each_time_stamp) + "_trip_seq"]
 
-# database setup
-client = pymongo.MongoClient('mongodb://localhost:27017/')
-db_GTFS = client.cota_gtfs
+    db_stop_times.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
+    db_seq.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
+    db_seq.create_index([("service_id", ASCENDING),("seq", ASCENDING),("route_id", ASCENDING),("stop_id", ASCENDING)])
+    db_stops.create_index([("stop_id", ASCENDING)])
+    db_trips.create_index([("service_id", ASCENDING), ("trip_id", ASCENDING)])
+    db_trips.create_index([("service_id", ASCENDING), ("route_id", ASCENDING)])
 
-db_time_stamps_set=set()
-db_time_stamps=[]
-raw_stamps=db_GTFS.collection_names()
-for each_raw in raw_stamps:
-    each_raw=int(each_raw.split("_")[0])
-    db_time_stamps_set.add(each_raw)
+start_date = date(2018, 2, 1)
+end_date = date(2018, 1, 31)
 
-for each_raw in db_time_stamps_set:
-    db_time_stamps.append(each_raw)
-db_time_stamps.sort()
+db_opt_result = client.cota_pr_optimization_result
+col_opt_result = db_opt_result.pr_opt_ibs
+col_opt_result.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
 
-
-for each_time_stamp in db_time_stamps:
-    db_stops=db_GTFS[str(each_time_stamp)+"_stops"]
-    db_stop_times=db_GTFS[str(each_time_stamp)+"_stop_times"]
-    db_trips=db_GTFS[str(each_time_stamp)+"_trips"]
-    db_seq = db_GTFS[str(each_time_stamp) + "_trip_seq"]
-
-    db_stop_times.create_index([("trip_id", pymongo.ASCENDING),("stop_id", pymongo.ASCENDING)])
-    db_seq.create_index([("trip_id", pymongo.ASCENDING),("stop_id", pymongo.ASCENDING)])
-    db_seq.create_index([("service_id", pymongo.ASCENDING),("seq", pymongo.ASCENDING),("route_id", pymongo.ASCENDING),("stop_id", pymongo.ASCENDING)])
-    db_stops.create_index([("stop_id", pymongo.ASCENDING)])
-    db_trips.create_index([("service_id", pymongo.ASCENDING), ("trip_id", pymongo.ASCENDING)])
-    db_trips.create_index([("service_id", pymongo.ASCENDING), ("route_id", pymongo.ASCENDING)])
-
+date_range = transfer_tools.daterange(start_date, end_date)
+for each_date in date_range:
+    today_date = each_date.strftime("%Y%m%d")  # date
