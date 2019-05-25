@@ -59,19 +59,15 @@ def validate_stop_time(single_date):
         service_id), "route_id": "002"}))  # Control the size of sampling
     count = 0
     total_count = len(rs_all_trips)
+    realtime_error = 0
 
     print(today_date, ": start.")
     for single_trip in rs_all_trips:
-        a = time.time()
         trip_id = single_trip["trip_id"]  # emurate rs_all_trips
         direction_id = int(single_trip["direction_id"])
         # route number: if direction_id=0 then tag=1; if direction_id=1 then tag=-1;
         route_id = int(single_trip["route_id"]) * (-direction_id*2+1)
-
         rs_all_stops = list(db_stop_times.find({"trip_id": trip_id}))
-
-        realtime_error = 0
-
         rs_all_trip_update = list(col_trip_update.find(
             {"trip_id": trip_id}, no_cursor_timeout=True))  # All GTFS real-time feed
         
@@ -91,30 +87,18 @@ def validate_stop_time(single_date):
                 else:
                     expected_stop_times_list[each_stop['stop']][time_current] = each_stop["arr"]
 
-        b = time.time()
-        first = b - a
-        second = 0
-        third = 0
-        fourth = 0
-        fifth = 0
-
         for single_stop_time in rs_all_stops: # Or you could directly query cota_real_time. But that could miss some stop since real-time data could miss some stop_time.
                                               # Another merit that we didn't directly query real-time is: we can save some time querying 
             stop_id = single_stop_time["stop_id"]  # query stop_times
 
-            a = time.time()
             # ----------------Find the optimal IB (insurance buffer)---------------------
             opt_ib = list(col_opt_result.find({"trip_id": trip_id, "stop_id": stop_id}))
             if len(opt_ib) == 0 :
                 opt_ib = "no_record"
             else:
                 opt_ib = opt_ib[0]
-            b = time.time()
-            second_ = b-a
-            second += second_
             # ----------------Find the optimal IB (insurance buffer)---------------------
 
-            a = time.time()
             line = {}
             a_stop = list(db_stops.find({"stop_id": stop_id}))
             if a_stop == []:
@@ -141,12 +125,7 @@ def validate_stop_time(single_date):
                 single_stop_time["arrival_time"], single_date, summer_time)  # schedule
 
             ### Time Actual: Time for actual transit arrival time, which is the last time you should be ###
-                        
-            b = time.time()
-            third_ = b-a
-            third += third_
-
-            a = time.time()
+        
             # This list is the alt trips' actual departure time. The sequence of this is the temporal sequence of trip sequence array in the SCHEDULE.
             # However, the order could be not strictly in temporal order.
             
@@ -165,11 +144,6 @@ def validate_stop_time(single_date):
                 continue
             line["time_actual"] = real_time
 
-            b = time.time()
-            fourth_ = b-a
-            fourth += fourth_
-
-            a = time.time()
             for time_walking in range(walking_time_limit):
                 if opt_ib == "no_record":
                     buffer = 120
@@ -215,35 +189,34 @@ def validate_stop_time(single_date):
                     line["time_alt_" + str(time_walking)] = "critical_trip"
 
             trips_collection.append(line)
-
-            b = time.time()
-            fifth_ = b-a
-            fifth += fifth_
-
             
-            if len(trips_collection) > 200:
+            if len(trips_collection)!= 0:
                 col_smart_transit.insert_many(trips_collection)
                 trips_collection = []
 
-        print(today_date, count, total_count, realtime_error, len(rs_all_stops), route_id)
+        # print(today_date, count, total_count, realtime_error, len(rs_all_stops), route_id)
         if round(count/total_count*100, 0) % 20 == 5:
             print(today_date, route_id, ": ", int(count /
                   total_count*100), " % finished.")
         count += 1
-        print(first, second, third, fourth, fifth)
-    
-    col_smart_transit.insert_many(trips_collection)
+
+    if len(trips_collection)!= 0:
+        col_smart_transit.insert_many(trips_collection)
+        trips_collection = []
     print(today_date, ": finished.")
     
 
 
 if __name__ == '__main__':
     start_date = date(2018, 2, 1)
-    end_date = date(2018, 1, 31)
-    
+    end_date = date(2019, 1, 31)
+    cores = multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(processes=25)
     date_range = transfer_tools.daterange(start_date, end_date)
-    validate_stop_time(start_date)
-
+    output = []
+    output = pool.map(validate_stop_time, date_range)
+    pool.close()
+    pool.join()
         
 
 

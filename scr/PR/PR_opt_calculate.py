@@ -47,8 +47,8 @@ def analyze_transfer(buffer, each_date):
     db_trips = db_GTFS[str(that_time_stamp) + "_trips"]
     db_stop_times = db_GTFS[str(that_time_stamp) + "_stop_times"]
     db_seq = db_GTFS[str(that_time_stamp)+"_trip_seq"]
-    db_today_real_time = db_real_time["R" + today_date]
-    db_today_trip_update = db_trip_update[today_date]
+    col_real_time = db_real_time["R" + today_date]
+    col_trip_update = db_trip_update[today_date]
 
     rs_all_trips = list(db_trips.find({"service_id": str(
         service_id), "route_id": "002"}))  # Control the size of sampling
@@ -66,7 +66,7 @@ def analyze_transfer(buffer, each_date):
 
         realtime_error = 0
 
-        rs_all_trip_update = list(db_today_trip_update.find(
+        rs_all_trip_update = list(col_trip_update.find(
             {"trip_id": trip_id}, no_cursor_timeout=True))  # All GTFS real-time feed
         
         expected_stop_times_list = {} # First key: stop, second key: T_cu. Value: T_ex
@@ -114,39 +114,23 @@ def analyze_transfer(buffer, each_date):
                 single_stop_time["arrival_time"], single_date, summer_time)  # schedule
 
             # Time Actual: Time for actual transit arrival time, which is the last time you should be
-            real_time = list(db_today_real_time.find(
-                {"stop_id": stop_id, "trip_id": trip_id}))
-
-            if (len(real_time) == 0):
+            alt_times_list = []
+            real_time = -1
+            alt_trips_list = list(col_real_time.find({"stop_id": stop_id, "route_id": route_id}))
+            for each_trip in alt_trips_list:
+                i_real_time = each_trip["time"]
+                alt_times_list.append(i_real_time)
+                if each_trip["trip_id"] == trip_id:
+                    real_time = i_real_time
+            if real_time == -1: 
                 line["time_actual"] = "no_realtime_trip"
                 # print("no_realtime_trip: ", stop_id, trip_id, route_id, that_time_stamp)
                 realtime_error += 1
                 continue
-            else:
-                line["time_actual"] = real_time[0]["time"]
-
-            alt_trips_list = list(db_seq.find({"service_id": str(
-                service_id), "stop_id": stop_id, "route_id": route_id}))
-
-            if len(alt_trips_list) == 0:
-                for time_walking in range(walking_time_limit):
-                    line["time_smart_" +
-                         str(time_walking)] == "gtfs_static_error"
-                # print("gtfs_static_error")
-                continue
-            alt_trips_list.sort(key=transfer_tools.sortQuery)
+            line["time_actual"] = real_time
 
             # This list is the alt trips' actual departure time. The sequence of this is the temporal sequence of trip sequence array in the SCHEDULE.
-            alt_times_list = []
             # However, the order could be not strictly in temporal order.
-            for each_trip in alt_trips_list:
-                i_trip_id = each_trip["trip_id"]
-                query_realtime = list(db_today_real_time.find(
-                    {"stop_id": stop_id, "trip_id": str(i_trip_id)}))
-                if query_realtime == []:  # the i_trip_id didn't exist.
-                    continue
-                i_real_time = query_realtime[0]["time"]
-                alt_times_list.append(i_real_time)
 
             for time_walking in range(walking_time_limit):
                 # Time Smart: Time for smart transit users' arrival time at the receiving stop
@@ -187,9 +171,8 @@ def analyze_transfer(buffer, each_date):
 
             trips_collection.append(line)
 
-            if len(trips_collection) > 200:
-                db_today_smart_transit.insert_many(trips_collection)
-                trips_collection = []
+            db_today_smart_transit.insert_many(trips_collection)
+            trips_collection = []
 
         #print(today_date, count, total_count, realtime_error, len(rs_all_stops))
         if round(count/total_count*100, 0) % 20 == 5:
