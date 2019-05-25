@@ -33,8 +33,21 @@ For each buffer In the possible buffer list:<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Find the RTA users’ arrival time t;<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Find the actual departure time T(t) correspondingly;<br />
 
-**PR_opt_optimize.py**: After validating each stop_time in GTFS, then find the optimal one with minimal waiting time for each stop_time.
+**PR_opt_optimize.py**: After validating each stop_time in GTFS, find the optimal one with minimal waiting time for each stop_time.
 
 **PR_opt_finalize.py**: Then, reduce every day's optimal IB into a day's schedule. Using average reducing rules.
 
 **PR_opt_revalidate.py**: Validate every day's stop_time again to test the effectiveness of the PR optimal strategy.
+
+### 2. Cross-compare different TPSs' waiting time difference
+
+**Todos**:
+PR optimal versus ER/NR/AR and
+RR optimal versus ER/NR/AR
+
+### 3. Visualization of waiting time, waiting time difference, and IBs.
+
+Todo: TPSs' waiting time;
+waiting time difference.
+IB
+
