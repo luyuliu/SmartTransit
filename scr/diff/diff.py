@@ -1,5 +1,4 @@
 
-import transfer_tools
 import sys
 import os
 from pymongo import MongoClient
@@ -8,9 +7,8 @@ import datetime
 import multiprocessing
 client = MongoClient('mongodb://localhost:27017/')
 
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+import transfer_tools
 
 db_GTFS = client.cota_gtfs
 db_real_time = client.cota_real_time
@@ -20,11 +18,14 @@ db_opt_result = client.cota_pr_optimization_result
 db_ar = client.cota_ar
 db_er = client.cota_er
 
+db_diff = client.cota_diff
+
+walking_time_limit = 10 # min
+criteria = 5 # seconds
 
 def calculate_diff(single_date):
-    records_dic = {}  # Avoid IO. But could be bad for small memory.
-
     today_date = single_date.strftime("%Y%m%d")  # date
+    print(today_date, " - Start.")
     col_real_time = db_real_time["R" + today_date]
 
     today_date = single_date.strftime("%Y%m%d")  # date
@@ -54,46 +55,80 @@ def calculate_diff(single_date):
     # ----------------------------------------------------------------------------------
 
     RTATPS = "RR"
-    nonRTATPS = "AR"
+    nonRTATPS = "ER"
 
-    if RTATPS == "RR":
-        col_RTA = db_smart_transit[today_date + "_0"]
-        rl_RTA = list(col_RTA.find({}))
-    elif RTATPS == "PR_opt":
-        col_RTA = db_opt_result[today_date]
-        rl_RTA = list(col_RTA.find({}))
-    else:
-        print("Setting error.")
-        return False
+    col_rr = db_smart_transit[today_date + "_0"] # RR
+    rl_rr = list(col_rr.find({}))
 
-    if nonRTATPS == "AR":
-        col_nonRTA = db_ar[today_date]
-        rl_nonRTA = list(col_nonRTA.find(
-            {"$or": [{"route_id": 2}, {"route_id": -2}]}))
-    elif nonRTATPS == "ER":
-        col_nonRTA = db_er['er']
-        rl_nonRTA = list(col_nonRTA.find(
-            {"$or": [{"route_id": 2}, {"route_id": -2}]}))
+    col_pr_opt = db_opt_result[today_date + "_reval"] # PR optimal
+    rl_pr_opt = list(col_pr_opt.find({}))
 
-    rl_nonRTA = sorted(rl_nonRTA, key=lambda i: (i['trip_id'], i['stop_id']))
-    rl_RTA = sorted(rl_RTA, key=lambda i: (i['trip_id'], i['stop_id']))
+    col_ar = db_ar[today_date] # AR
+    rl_ar = list(col_ar.find(
+        {"$or": [{"route_id": 2}, {"route_id": -2}]}))
 
-    print(RTATPS, len(rl_nonRTA), nonRTATPS, len(rl_RTA))
+    col_er = db_er[today_date] # ER
+    rl_er = list(col_er.find(
+        {"$or": [{"route_id": 2}, {"route_id": -2}]}))
+
+    rl_rr = sorted(rl_rr, key=lambda i: (i['trip_id'], i['stop_id']))
+    rl_pr_opt = sorted(rl_pr_opt, key=lambda i: (i['trip_id'], i['stop_id']))
+    rl_ar = sorted(rl_ar, key=lambda i: (i['trip_id'], i['stop_id']))
+    rl_er = sorted(rl_er, key=lambda i: (i['trip_id'], i['stop_id']))
+
+    print(len(rl_rr), len(rl_pr_opt), len(rl_ar), len(rl_er))
 
     list_record = []
 
-    for index, each_record in rl_RTA:
-        trip_id = each_record["trip_id"]
-        stop_id = each_record["stop_id"]
-        route_id = each_record["route_id"]
-        each_record.pop("_id", None)
+    for index in range(len(rl_pr_opt)):
+        trip_id = rl_pr_opt[index]["trip_id"]
+        stop_id = rl_pr_opt[index]["stop_id"]
+        route_id = rl_pr_opt[index]["route_id"]
+        rl_pr_opt[index].pop("_id", None)
 
-        for index_, each_non_record in rl_nonRTA:
-            if each_non_record["trip_id"] == trip_id and each_non_record["stop_id"] == stop_id:
-                each_record["time_"+ nonRTATPS.lower() + "_arrival"] = each_non_record["time"]
-                if nonRTATPS == "ER":
-                    each_record["time_"+ nonRTATPS.lower() + "_arrival"] = each_non_record["time"]
+        for non_index in range(len(rl_er)):
+            if rl_er[non_index]["trip_id"] == trip_id and rl_er[non_index]["stop_id"] == stop_id:
+                rl_pr_opt[index]["time_er_arr"] = rl_er[non_index]["time_er_arr"]
+                rl_pr_opt[index]["time_er_alt"] = rl_er[non_index]["time_er_alt"]
+                del rl_er[non_index]
+                break
+        
+        for non_index in range(len(rl_ar)):
+            if rl_ar[non_index]["trip_id"] == trip_id and rl_ar[non_index]["stop_id"] == stop_id:
+                rl_pr_opt[index]["time_ar_arr"] = rl_ar[non_index]["rand_time"]
+                del rl_ar[non_index]
+                break
+        
+        for non_index in range(len(rl_rr)):
+            if rl_rr[non_index]["trip_id"] == trip_id and rl_rr[non_index]["stop_id"] == stop_id:
+                for walking_time in range(walking_time_limit):
+                    rl_pr_opt[index]["time_rr_arr_" + str(walking_time)] = rl_rr[non_index]["time_smart_" + str(walking_time)]
+                    rl_pr_opt[index]["time_rr_alt_" + str(walking_time)] = rl_rr[non_index]["time_alt_" + str(walking_time)]
+                del rl_rr[non_index]
+                break 
+        
+    
+    print(today_date, " - Reduction finished.")
+    
+    print(len(rl_rr), len(rl_pr_opt), len(rl_ar), len(rl_er))
+    col_diff = db_diff[today_date]
+    col_diff.insert_many(rl_pr_opt)
 
 
 if __name__ == "__main__":
-    calculate_diff(date(2018, 2, 1))
+    start_date = date(2018, 2, 1)
+    end_date = date(2019, 1, 30)
+
+    # calculate_diff(start_date)
+    # col_list_real_time = transfer_tools.daterange(start_date, end_date)
+
+    cores = int(multiprocessing.cpu_count()/4*3)
+    pool = multiprocessing.Pool(processes=cores)
+    date_range = transfer_tools.daterange(start_date, end_date)
+    output = []
+    output = pool.map(calculate_diff, date_range)
+    pool.close()
+    pool.join()
+
+    # for i in col_list_real_time:
+    #     calculate_diff(i)
