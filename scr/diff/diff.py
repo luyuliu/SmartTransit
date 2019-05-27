@@ -1,4 +1,5 @@
 
+import transfer_tools
 import sys
 import os
 from pymongo import MongoClient
@@ -9,7 +10,6 @@ client = MongoClient('mongodb://localhost:27017/')
 
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import transfer_tools
 
 
 db_GTFS = client.cota_gtfs
@@ -26,7 +26,6 @@ def calculate_diff(single_date):
 
     today_date = single_date.strftime("%Y%m%d")  # date
     col_real_time = db_real_time["R" + today_date]
-    result_real_time = list(col_real_time.find({}))
 
     today_date = single_date.strftime("%Y%m%d")  # date
 
@@ -49,8 +48,8 @@ def calculate_diff(single_date):
     db_trips = db_GTFS[str(that_time_stamp) + "_trips"]
     db_stop_times = db_GTFS[str(that_time_stamp) + "_stop_times"]
     db_seq = db_GTFS[str(that_time_stamp) + "_trip_seq"]
-    db_today_real_time = db_real_time["R" + today_date]
-    db_today_trip_update = db_trip_update[today_date]
+    col_real_time = db_real_time["R" + today_date]
+    col_trip_update = db_trip_update[today_date]
 
     # ----------------------------------------------------------------------------------
 
@@ -59,25 +58,41 @@ def calculate_diff(single_date):
 
     if RTATPS == "RR":
         col_RTA = db_smart_transit[today_date + "_0"]
+        rl_RTA = list(col_RTA.find({}))
     elif RTATPS == "PR_opt":
         col_RTA = db_opt_result[today_date]
+        rl_RTA = list(col_RTA.find({}))
     else:
         print("Setting error.")
         return False
 
     if nonRTATPS == "AR":
         col_nonRTA = db_ar[today_date]
+        rl_nonRTA = list(col_nonRTA.find(
+            {"$or": [{"route_id": 2}, {"route_id": -2}]}))
+    elif nonRTATPS == "ER":
+        col_nonRTA = db_er['er']
+        rl_nonRTA = list(col_nonRTA.find(
+            {"$or": [{"route_id": 2}, {"route_id": -2}]}))
 
-    rl_RTA = list(col_RTA.find({}))
+    rl_nonRTA = sorted(rl_nonRTA, key=lambda i: (i['trip_id'], i['stop_id']))
+    rl_RTA = sorted(rl_RTA, key=lambda i: (i['trip_id'], i['stop_id']))
 
-    rl_nonRTA = list(col_nonRTA.find({"$or": [{"route_id": 2}, {"route_id": -2}]}))
+    print(RTATPS, len(rl_nonRTA), nonRTATPS, len(rl_RTA))
 
-    print(len(rl_nonRTA), len(rl_RTA))
+    list_record = []
 
-    for each_record in rl_RTA:
+    for index, each_record in rl_RTA:
         trip_id = each_record["trip_id"]
         stop_id = each_record["stop_id"]
         route_id = each_record["route_id"]
+        each_record.pop("_id", None)
+
+        for index_, each_non_record in rl_nonRTA:
+            if each_non_record["trip_id"] == trip_id and each_non_record["stop_id"] == stop_id:
+                each_record["time_"+ nonRTATPS.lower() + "_arrival"] = each_non_record["time"]
+                if nonRTATPS == "ER":
+                    each_record["time_"+ nonRTATPS.lower() + "_arrival"] = each_non_record["time"]
 
 
 if __name__ == "__main__":

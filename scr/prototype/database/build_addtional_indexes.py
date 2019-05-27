@@ -29,6 +29,15 @@ db_opt_result = client.cota_pr_optimization_result
 col_opt_result = db_opt_result.pr_opt_ibs
 col_opt_result.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
 
+db_er = client.cota_er
+col_er = db_er.er
+col_er.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
+
+db_real_time = client.cota_real_time
+
 date_range = transfer_tools.daterange(start_date, end_date)
 for each_date in date_range:
     today_date = each_date.strftime("%Y%m%d")  # date
+    col_real_time = db_real_time["R" + today_date]
+    
+    col_real_time.create_index([("stop_id", ASCENDING),("route_id", ASCENDING)])
