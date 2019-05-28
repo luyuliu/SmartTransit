@@ -112,6 +112,8 @@ def calculate_diff(single_date):
     
     print(len(rl_rr), len(rl_pr_opt), len(rl_ar), len(rl_er))
     col_diff = db_diff[today_date]
+    if len(rl_pr_opt)==0:
+        return False
     col_diff.insert_many(rl_pr_opt)
 
 
