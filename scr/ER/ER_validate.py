@@ -3,7 +3,7 @@ from datetime import timedelta, date
 import datetime
 import multiprocessing
 
-import os, sys
+import os, sys, time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import transfer_tools
 
@@ -22,12 +22,8 @@ criteria = 5
 def validate_er(single_date):
     records_dic={} # Avoid IO. But could be bad for small memory.
     today_date = single_date.strftime("%Y%m%d")  # date
-    if (single_date - date(2018, 3, 10)).total_seconds() <= 0 or (single_date - date(2018, 11, 3)).total_seconds() > 0:
-        summer_time = 0
-    else:
-        summer_time = 1
-    today_seconds = int((single_date - date(1970, 1, 1)
-                        ).total_seconds()) + 18000 + 3600*summer_time
+    today_date = single_date.strftime("%Y%m%d")  # date
+    today_seconds = time.mktime(time.strptime(today_date, "%Y%m%d"))
     print(today_date + " - Start.")
     col_real_time = db_real_time["R" + today_date]
     rl_real_time = list(col_real_time.find({}))

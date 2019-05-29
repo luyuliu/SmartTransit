@@ -27,10 +27,6 @@ designated_route = 2
 def validate_stop_time(single_date):
     dic_stops = {}
     today_date = single_date.strftime("%Y%m%d")  # date
-    if (single_date - date(2018, 3, 10)).total_seconds() <= 0 or (single_date - date(2018, 11, 3)).total_seconds() > 0:
-        summer_time = 0
-    else:
-        summer_time = 1
     today_weekday = single_date.weekday()  # day of week
     if today_weekday < 5:
         service_id = 1
@@ -122,7 +118,7 @@ def validate_stop_time(single_date):
 
             ### Time Normal: Time for normal transit users, aka scheduled time follower ###
             line["time_normal"] = transfer_tools.convert_to_timestamp(
-                single_stop_time["arrival_time"], single_date, summer_time)  # schedule
+                single_stop_time["arrival_time"], single_date)  # schedule
 
             ### Time Actual: Time for actual transit arrival time, which is the last time you should be ###
         

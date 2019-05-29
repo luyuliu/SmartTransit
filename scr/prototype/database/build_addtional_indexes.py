@@ -34,6 +34,7 @@ col_er = db_er.er
 col_er.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
 
 db_real_time = client.cota_real_time
+db_diff = client.cota_diff
 
 date_range = transfer_tools.daterange(start_date, end_date)
 for each_date in date_range:
@@ -41,3 +42,5 @@ for each_date in date_range:
     col_real_time = db_real_time["R" + today_date]
     
     col_real_time.create_index([("stop_id", ASCENDING),("route_id", ASCENDING)])
+    col_diff = db_diff[today_date]
+    col_diff.create_index([("route_id", ASCENDING)])

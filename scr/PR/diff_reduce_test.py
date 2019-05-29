@@ -30,10 +30,6 @@ def reduce_diff(start_date, end_date):
 
     dic_stops = {}
     for single_date in date_range:
-        if (single_date - date(2018, 3, 10)).total_seconds() <= 0 or (single_date - date(2018, 11, 3)).total_seconds() > 0:
-            summer_time = 0
-        else:
-            summer_time = 1
         today_date = single_date.strftime("%Y%m%d")  # date
         col_diff = db_diff[today_date]
 
@@ -108,7 +104,7 @@ def reduce_diff(start_date, end_date):
 
             # AR
             try:
-                wt_ar = single_stop_time["time_ar_alt"] - time_normal # dt_ar is always equal to wt_ar
+                wt_ar = time_actual - single_stop_time["time_ar_arr"]  # dt_ar is always equal to wt_ar
             except:
                 pass
             else:
@@ -116,6 +112,7 @@ def reduce_diff(start_date, end_date):
                     error_tag = True
                 else:
                     dic_stops[stop_id]["wt_ar"] += wt_ar
+                    # print(single_stop_time["time_er_arr"] - single_stop_time["time_ar_arr"])
 
             # NR
             try:
@@ -150,8 +147,8 @@ def reduce_diff(start_date, end_date):
                 else:
                     if wt_pr_opt<-criteria or wt_pr_opt>86400 or pr_opt_pass_token == True:
                         error_tag = True
-                    if wt_pr_opt > 300:
-                        print(wt_pr_opt, trip_id, stop_id, time_walking)
+                    # if wt_pr_opt > 900: # 15 minutes
+                    #     print(wt_pr_opt, trip_id, stop_id, time_walking)
                     else:
                         dic_stops[stop_id]["wt_pr_opt_"+str(time_walking)] += wt_pr_opt
                         dic_stops[stop_id]["dt_pr_opt_"+str(time_walking)] += dt_pr_opt
@@ -203,13 +200,14 @@ def reduce_diff(start_date, end_date):
             value['wt_pr_opt_'+str(time_walking)] = value['wt_pr_opt_'+str(time_walking)]/value['total']
             value['dt_pr_opt_'+str(time_walking)] = value['dt_pr_opt_'+str(time_walking)]/value['total']
             value['buffer_pr_opt_'+str(time_walking)] = value['buffer_pr_opt_'+str(time_walking)]/value['total']
-        db_result_route.insert_one(value)
+            print("[ ", key, " - ", time_walking, " ]: ", "AR: ", value['wt_ar']/60, "ER: ", value['wt_er']/60, "NR: ", value['wt_nr']/60, "RR: ", value['wt_rr_'+str(time_walking)]/60, "PR_opt: ", value['wt_pr_opt_'+str(time_walking)]/60)
+
     print(today_date, " - Insert done.")
 
 
 if __name__ == "__main__":
-    start_date = date(2018, 2, 1)
-    end_date = date(2019, 1, 30)
+    start_date = date(2018, 3,8)
+    end_date = date(2018, 3, 9)
     reduce_diff(start_date, end_date)
 
     # Todo: find skip reason

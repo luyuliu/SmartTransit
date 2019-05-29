@@ -1,6 +1,7 @@
 from datetime import timedelta, date
 import datetime
 from pymongo import MongoClient
+import time
 
 
 def daterange(start_date, end_date):
@@ -26,8 +27,8 @@ db_time_stamps.sort()
 
 
 def find_gtfs_time_stamp(single_date):
-    today_seconds = int(
-        (single_date - date(1970, 1, 1)).total_seconds()) + 18000
+    today_date = single_date.strftime("%Y%m%d")  # date
+    today_seconds = time.mktime(time.strptime(today_date, "%Y%m%d"))
     backup = db_time_stamps[0]
     for each_time_stamp in db_time_stamps:
         if each_time_stamp - today_seconds > 86400:
@@ -36,15 +37,16 @@ def find_gtfs_time_stamp(single_date):
     return db_time_stamps[len(db_time_stamps) - 1]
 
 
-def convert_to_timestamp(time_string, single_date, summer_time):
+def convert_to_timestamp(time_string, single_date):
     time = time_string.split(":")
     hours = int(time[0])
     minutes = int(time[1])
     seconds = int(time[2])
     total_second = hours * 3600 + minutes * 60 + seconds
 
-    today_seconds = int(
-        (single_date - date(1970, 1, 1)).total_seconds()) + 18000 - summer_time*3600
+    today_date = single_date.strftime("%Y%m%d")  # date
+        
+    today_seconds = time.mktime(time.strptime(today_date, "%Y%m%d"))
 
     return total_second+today_seconds
 

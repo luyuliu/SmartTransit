@@ -27,10 +27,6 @@ is_paralleled = False
 def analyze_transfer(buffer, each_date):
     single_date = each_date
     trips_collection = []
-    if (single_date - date(2018, 3, 10)).total_seconds() <= 0 or (single_date - date(2018, 11, 3)).total_seconds() > 0:
-        summer_time = 0
-    else:
-        summer_time = 1
     today_date = single_date.strftime("%Y%m%d")  # date
 
     today_weekday = single_date.weekday()  # day of week
@@ -111,7 +107,7 @@ def analyze_transfer(buffer, each_date):
 
             # Time Normal: Time for normal transit users, aka scheduled time follower
             line["time_normal"] = transfer_tools.convert_to_timestamp(
-                single_stop_time["arrival_time"], single_date, summer_time)  # schedule
+                single_stop_time["arrival_time"], single_date)  # schedule
 
             # Time Actual: Time for actual transit arrival time, which is the last time you should be
             alt_times_list = []

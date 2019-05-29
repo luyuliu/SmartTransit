@@ -28,6 +28,7 @@ def analyze_transfer(single_date):
     today_date = single_date.strftime("%Y%m%d")  # date
     
     insurance_buffers = range(0, 301, 10)
+    # insurance_buffers = range(300, -1, -10)
 
     records_dic=[] # Avoid IO. But could be bad for small memory.
     print(today_date +" - Initialization.")
@@ -39,8 +40,7 @@ def analyze_transfer(single_date):
         print(today_date + " - Skip.")
         return False
 
-    for each_buffer in insurance_buffers:    
-        
+    for each_buffer in insurance_buffers:
         db_today_smart_transit = db_smart_transit[today_date+"_"+str(each_buffer)]
         each_buffer_trip_collection = list(db_today_smart_transit.find({}))
         if each_buffer == insurance_buffers[0]:

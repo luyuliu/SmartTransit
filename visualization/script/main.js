@@ -173,6 +173,54 @@ $("#start-opt-btn").click(function () {
 
 });
 
+$("#start-3-btn").click(function () {
+  var routeID = $("#route-3-input").val()
+  var variableCode = $("#variable-3-input").val()
+  var queryURL = "http://127.0.0.1:50033/" + routeID + '_stops'
+  console.log(queryURL)
+
+  $.ajax({
+    url: queryURL,
+    type: "GET",
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-Content-Type-Options', 'nosniff');
+    },
+    success: function (rawstops) {
+      var stops = rawstops._items
+      console.log(stops)
+      visualizationReduce(stops, variableCode);
+    }
+  });
+});
+
+function visualizationReduce(stops, variableCode) {
+  var baseRadius = 84;
+  var colorRamp, colorCode;
+
+  // eval("colorRamp = " + variableCode + "Ramp");
+  // eval("colorCode = " + variableCode + "Code");
+  
+  var colorRamp = [0, 150, 200, 250, 300, 450, 600, Infinity]
+  var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#000000"]
+
+  for (var j = 9; j >= 0; j--) {
+    for (var i = 0; i < stops.length; i++) {
+      L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
+        radius: baseRadius * j,
+        stroke: true,
+        weight: 0.2,
+        color: "#000000",
+        fillOpacity: 1,
+        // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode)
+        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"], colorRamp, colorCode)
+      }).addTo(map);
+      console.log(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"])
+
+    }
+  }
+}
+
 function visualization(stops, variableCode) {
   var baseRadius = 84;
   var colorRamp, colorCode;

@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from datetime import timedelta, date
 import datetime
 import multiprocessing
+import time
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,13 +19,11 @@ db_opt_result = client.cota_er
 def analyze_transfer(start_date, end_date):
     records_dic={} # Avoid IO. But could be bad for small memory.
     for single_date in transfer_tools.daterange(start_date, end_date):
-        if (single_date - date(2018, 3, 10)).total_seconds() <= 0 or (single_date - date(2018, 11, 3)).total_seconds() > 0:
-            summer_time = 0
-        else:
-            summer_time = 1
-        today_seconds = int((single_date - date(1970, 1, 1)
-                         ).total_seconds()) + 18000 + 3600*summer_time
+        
         today_date = single_date.strftime("%Y%m%d")  # date
+        
+        today_seconds = time.mktime(time.strptime(today_date, "%Y%m%d"))
+
         col_real_time = db_real_time["R"+today_date]
         result_real_time = list(col_real_time.find({}))
         col_er = db_opt_result["er"]
