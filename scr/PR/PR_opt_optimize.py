@@ -32,8 +32,8 @@ def analyze_transfer(single_date):
 
     records_dic=[] # Avoid IO. But could be bad for small memory.
     print(today_date +" - Initialization.")
-
-    pre_count = db_opt_result[today_date+"_opt"].estimated_document_count()
+    col_pr_opt_result = db_opt_result[today_date+"_opt_risk_averse"]
+    pre_count = col_pr_opt_result.estimated_document_count()
     count = db_smart_transit[today_date+"_0"].estimated_document_count()
 
     if count == pre_count:
@@ -64,7 +64,7 @@ def analyze_transfer(single_date):
                         records_dic[index]["optima_buffer_"+str(walking_time)] = each_buffer
     
     if len(records_dic)!= 0:
-        db_opt_result[today_date+"_opt"].insert_many(records_dic)
+        col_pr_opt_result.insert_many(records_dic)
         print(today_date +" - Database insert.")
     else:
         print(today_date +" - Skip.")
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     # single_date = date(2018, 2, 1)
     # analyze_transfer(single_date)
     
-    start_date = date(2018, 2, 2)
+    start_date = date(2018, 2, 1)
     end_date = date(2019, 1, 31)
 
     cores = multiprocessing.cpu_count()

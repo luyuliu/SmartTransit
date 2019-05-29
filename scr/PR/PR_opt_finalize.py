@@ -30,7 +30,7 @@ def calculate_parameters(start_date, end_date):
     for single_date in transfer_tools.daterange(start_date, end_date):
         today_date = single_date.strftime("%Y%m%d")  # date
         print(today_date +" - Calculation.")
-        col_opt_result = db_opt_result[today_date + "_opt"]
+        col_opt_result = db_opt_result[today_date + "_opt_risk_averse"]
         rl_opt_result = list(col_opt_result.find({}))
 
         for each_record in rl_opt_result:
@@ -67,7 +67,7 @@ def calculate_parameters(start_date, end_date):
     print(today_date +" - Database insert.")
     for each_trip, stop_collection in records_dic.items():
         for each_stop, each_record in stop_collection.items():
-            db_opt_result["pr_opt_ibs"].insert_one(each_record)
+            db_opt_result["pr_opt_ibs_risk_averse"].insert_one(each_record)
     
 
 
