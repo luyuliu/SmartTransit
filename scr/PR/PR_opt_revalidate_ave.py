@@ -12,7 +12,7 @@ db_GTFS = client.cota_gtfs
 db_real_time = client.cota_real_time
 db_trip_update = client.trip_update
 db_opt_result = client.cota_pr_optimization_result
-col_opt_result = db_opt_result.pr_opt_ibs
+col_opt_result = db_opt_result.pr_opt_ibs_risk_averse
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -42,6 +42,10 @@ def validate_stop_time(single_date):
     col_trip_update = db_trip_update[today_date]
 
     trips_collection = []
+
+    pre_count = col_smart_transit.estimated_document_count()
+
+    col_smart_transit.drop() # ------------------------------------------------------
 
     that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
     db_stops = db_GTFS[str(that_time_stamp) + "_stops"]

@@ -35,7 +35,7 @@ def reduce_diff(start_date, end_date):
         else:
             summer_time = 1
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff[today_date]
+        col_diff = db_diff["RA_" + today_date]
 
         that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
 
@@ -108,7 +108,7 @@ def reduce_diff(start_date, end_date):
 
             # AR
             try:
-                wt_ar = time_actual - single_stop_time["time_ar_arr"] # dt_ar is always equal to wt_ar
+                wt_ar =  time_actual - single_stop_time["time_ar_arr"] # dt_ar is always equal to wt_ar
             except:
                 pass
             else:
@@ -190,7 +190,7 @@ def reduce_diff(start_date, end_date):
         print(today_date, " - Done.")
 
     print(today_date, " - Insert start.")
-    db_result_route = db_diff_reduce[str(designated_route_id) + "_stops"]
+    db_result_route = db_diff_reduce[str(designated_route_id) + "_stops_risk_averse"]
     for key, value in dic_stops.items():
         value["wt_nr"] = value['wt_nr']/value['total']
         value["wt_er"] = value['wt_er']/value['total']

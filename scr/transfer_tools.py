@@ -38,10 +38,10 @@ def find_gtfs_time_stamp(single_date):
 
 
 def convert_to_timestamp(time_string, single_date):
-    time = time_string.split(":")
-    hours = int(time[0])
-    minutes = int(time[1])
-    seconds = int(time[2])
+    theTime = time_string.split(":")
+    hours = int(theTime[0])
+    minutes = int(theTime[1])
+    seconds = int(theTime[2])
     total_second = hours * 3600 + minutes * 60 + seconds
 
     today_date = single_date.strftime("%Y%m%d")  # date

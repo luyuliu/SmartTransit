@@ -39,7 +39,7 @@ def validate_er(single_date):
         query_rl = col_er.find_one({"trip_id": trip_id, "stop_id": stop_id})
         if query_rl == None:
             continue
-        each_record["time_er_arr"] = int(query_rl["time"]) + today_seconds
+        each_record["time_er_arr"] = int(query_rl["time"] + today_seconds)
         alt_cal_rl = transfer_tools.find_alt_time(each_record["time_er_arr"], route_id, stop_id, today_date, criteria)
         each_record["time_er_alt"] = alt_cal_rl[0]
         each_record["time_er_trip_id"] = alt_cal_rl[1]

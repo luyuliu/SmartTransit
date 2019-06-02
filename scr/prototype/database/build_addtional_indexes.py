@@ -27,11 +27,14 @@ end_date = date(2018, 1, 31)
 
 db_opt_result = client.cota_pr_optimization_result
 col_opt_result = db_opt_result.pr_opt_ibs
+col_opt_result_risk_averse = db_opt_result.pr_opt_ibs_risk_averse
 col_opt_result.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
+col_opt_result_risk_averse.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
 
 db_er = client.cota_er
 col_er = db_er.er
 col_er.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
+
 
 db_real_time = client.cota_real_time
 db_diff = client.cota_diff

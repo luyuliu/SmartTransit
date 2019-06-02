@@ -1,5 +1,10 @@
 DOMAIN = {
-    '2_stops': {'datasource': {'source': '2_stops'}},
+    '-2_stops_risk_averse': {'datasource': {'source': '-2_stops_risk_averse'}},
+        '2_stops_risk_averse': {'datasource': {'source': '2_stops_risk_averse'}},
+        '-2_stops_max': {'datasource': {'source': '-2_stops_max'}},
+        '-2_stops': {'datasource': {'source': '-2_stops'}},
+        '2_stops': {'datasource': {'source': '2_stops'}},
+        '2_stops_max': {'datasource': {'source': '2_stops_max'}},
         }
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017

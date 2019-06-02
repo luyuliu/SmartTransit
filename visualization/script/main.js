@@ -176,7 +176,7 @@ $("#start-opt-btn").click(function () {
 $("#start-3-btn").click(function () {
   var routeID = $("#route-3-input").val()
   var variableCode = $("#variable-3-input").val()
-  var queryURL = "http://127.0.0.1:50033/" + routeID + '_stops'
+  var queryURL = "http://127.0.0.1:50033/" + routeID + '_stops_max'
   console.log(queryURL)
 
   $.ajax({
@@ -201,8 +201,12 @@ function visualizationReduce(stops, variableCode) {
   // eval("colorRamp = " + variableCode + "Ramp");
   // eval("colorCode = " + variableCode + "Code");
   
-  var colorRamp = [0, 150, 200, 250, 300, 450, 600, Infinity]
-  var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#000000"]
+  // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // difference
+  // var colorRamp = [0, 150, 200, 250, 300, 350, 400, Infinity] // waiting time per se
+  // var colorRamp = [0, 120, 150, 240, 270, 360, 450, Infinity] // buffer
+  var colorRamp = [0, 1, 5, 10, 20, 50, 75, 100] // miss rate
+
+  var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
 
   for (var j = 9; j >= 0; j--) {
     for (var i = 0; i < stops.length; i++) {
@@ -212,10 +216,14 @@ function visualizationReduce(stops, variableCode) {
         weight: 0.2,
         color: "#000000",
         fillOpacity: 1,
-        // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode)
-        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"], colorRamp, colorCode)
+        // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt, RR difference
+        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
+        
+
       }).addTo(map);
-      console.log(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"])
+      console.log(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] )
 
     }
   }
