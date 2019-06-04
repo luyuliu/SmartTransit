@@ -132,14 +132,15 @@ $("#start-btn").click(function () {
       for (var j = 9; j >= 0; j--) {
         for (var i = 0; i < stops.length; i++) {
           diff_time = stops[i]["wt_dif_" + j]
-          L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
+          var cir = L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
             radius: baseRadius * j,
             stroke: true,
             weight: 0.2,
             color: "#000000",
             fillOpacity: 1,
             fillColor: returnColor(diff_time, colorWTRamp, colorWTCode)
-          }).addTo(map);
+          });          
+          cir.addTo(map);
 
         }
       }
@@ -198,32 +199,43 @@ function visualizationReduce(stops, variableCode) {
   var baseRadius = 84;
   var colorRamp, colorCode;
 
-  // eval("colorRamp = " + variableCode + "Ramp");
-  // eval("colorCode = " + variableCode + "Code");
-  
-  // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // difference
+  // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
   // var colorRamp = [0, 150, 200, 250, 300, 350, 400, Infinity] // waiting time per se
-  // var colorRamp = [0, 120, 150, 240, 270, 360, 450, Infinity] // buffer
-  var colorRamp = [0, 1, 5, 10, 20, 50, 75, 100] // miss rate
+  // var colorRamp = [0, 120, 140, 160, 200, 225, 250, Infinity] // buffer
+  // var colorRamp = [0, 2.5, 5, 10, 25, 50, 75, 100] // miss rate
+  // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
+  var colorRamp = [-Infinity, 0, 200, 300, 400, 500, 600, Infinity] // rr and pr_opt diff
+  // var colorRamp = [0, 200, 250, 300, 350, 400, 600, Infinity] // ar and pr_opt diff
+  // var colorRamp = [0, 250, 300, 350, 400, 500, 600, Infinity] // er and pr_opt diff
 
   var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
 
   for (var j = 9; j >= 0; j--) {
     for (var i = 0; i < stops.length; i++) {
-      L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
+      var cir=L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
         radius: baseRadius * j,
         stroke: true,
         weight: 0.2,
         color: "#000000",
         fillOpacity: 1,
+        info: stops[i],
         // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
-        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR and buffer
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt, RR difference
-        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
+        // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
+        // fillColor: returnColor((stops[i]["mc_rr_"+ j.toString()] - stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
         
+        fillColor: returnColor(stops[i]["wt_ar"] - stops[i]["wt_er"] , colorRamp, colorCode) // ar/er and pr_opt diff
 
-      }).addTo(map);
-      console.log(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] )
+      });
+      cir.on("click",function(d){
+        console.log(d)
+      })
+      
+      cir.addTo(map);
+
+      console.log((stops[i]["mc_rr_"+ j.toString()] - stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"])
 
     }
   }
@@ -287,7 +299,6 @@ function returnColor(value, colorRamp, colorCode) {
       continue;
     }
   }
-  console.log(value)
   return
 }
 
