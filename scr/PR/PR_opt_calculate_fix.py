@@ -15,7 +15,7 @@ import transfer_tools
 db_GTFS = client.cota_gtfs
 db_real_time = client.cota_real_time
 db_trip_update = client.trip_update
-db_smart_transit = client.cota_pr_optimization
+db_smart_transit = client.cota_pr_optimization_test
 
 
 walking_time_limit = 10
@@ -36,7 +36,7 @@ def analyze_transfer(buffer, each_date):
         service_id = 2
     else:
         service_id = 3
-    db_today_smart_transit = db_smart_transit[today_date+"_"+str(buffer)]
+    db_today_smart_transit = db_smart_transit[today_date+"_"+str(buffer) +"_test"]
 
     that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
     db_stops = db_GTFS[str(that_time_stamp) + "_stops"]
@@ -107,7 +107,7 @@ def analyze_transfer(buffer, each_date):
 
             # Time Normal: Time for normal transit users, aka scheduled time follower
             line["time_normal"] = transfer_tools.convert_to_timestamp(
-                single_stop_time["arrival_time"], single_date)  # schedule. This is not right.
+                single_stop_time["arrival_time"], single_date)  # schedule
 
             # Time Actual: Time for actual transit arrival time, which is the last time you should be
             alt_times_list = []
@@ -143,9 +143,11 @@ def analyze_transfer(buffer, each_date):
                              str(time_walking)] = time_current + time_walking*60
                         break
 
-                if time_current + time_walking*60 + buffer >= time_feed:
+                if time_current + time_walking*60 + buffer >= time_feed: # Could be why. I need to make sure the missed trips in the PR_miss_rate_test.py is exactly these trips which is skipped.
                     line["time_smart_" +
                          str(time_walking)] = time_current + time_walking*60
+                    line["time_smart_skiptag_" +
+                         str(time_walking)] = True
                 if line["time_smart_" + str(time_walking)] == 0:
                     line["time_smart_" +
                          str(time_walking)] == "cannot_find_smart"
@@ -183,22 +185,13 @@ if __name__ == '__main__':
 
     insurance_buffers = range(0, 301, 10)
 
-    start_date = date(2018, 11, 17)
-    end_date = date(2019, 1, 31)
+    start_date = date(2018, 2, 1)
+    end_date = date(2018, 2, 2)
 
-    if is_paralleled:
+    for each_date in transfer_tools.daterange(start_date, end_date):
         cores = multiprocessing.cpu_count()
-        pool = multiprocessing.Pool(processes=25)
-        date_range = transfer_tools.daterange(start_date, end_date)
+        pool = multiprocessing.Pool(processes=30)
         output = []
-        output = pool.map(analyze_transfer, date_range)
+        output = pool.starmap(analyze_transfer, zip(insurance_buffers,[each_date]*len(insurance_buffers)))
         pool.close()
         pool.join()
-    else:
-        for each_date in transfer_tools.daterange(start_date, end_date):
-            cores = multiprocessing.cpu_count()
-            pool = multiprocessing.Pool(processes=31)
-            output = []
-            output = pool.starmap(analyze_transfer, zip(insurance_buffers,[each_date]*len(insurance_buffers)))
-            pool.close()
-            pool.join()

@@ -74,7 +74,7 @@ map.on("dragend", function (e) {
 })
 
 map.on("click", function (e) {
-  console.log(e)
+  // console.log(e)
 })
 
 
@@ -201,10 +201,10 @@ function visualizationReduce(stops, variableCode) {
 
   // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
   // var colorRamp = [0, 150, 200, 250, 300, 350, 400, Infinity] // waiting time per se
-  // var colorRamp = [0, 120, 140, 160, 200, 225, 250, Infinity] // buffer
+  var colorRamp = [0, 120, 140, 160, 200, 225, 250, Infinity] // buffer
   // var colorRamp = [0, 2.5, 5, 10, 25, 50, 75, 100] // miss rate
   // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
-  var colorRamp = [-Infinity, 0, 200, 300, 400, 500, 600, Infinity] // rr and pr_opt diff
+  // var colorRamp = [-Infinity, 0, 200, 300, 400, 500, 600, Infinity] // rr and pr_opt diff
   // var colorRamp = [0, 200, 250, 300, 350, 400, 600, Infinity] // ar and pr_opt diff
   // var colorRamp = [0, 250, 300, 350, 400, 500, 600, Infinity] // er and pr_opt diff
 
@@ -219,18 +219,23 @@ function visualizationReduce(stops, variableCode) {
         color: "#000000",
         fillOpacity: 1,
         info: stops[i],
+        stop_id: stops[i]["stop_id"],
+        j: j,
+        value: stops[i][variableCode + "_" + j.toString()],
+        miss_rate :stops[i]["mc_pr_opt_" + j.toString()]/ stops[i]["total"]*100,
         // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
-        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR and buffer
+        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR and buffer
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt, RR difference
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
         // fillColor: returnColor((stops[i]["mc_rr_"+ j.toString()] - stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
         
-        fillColor: returnColor(stops[i]["wt_ar"] - stops[i]["wt_er"] , colorRamp, colorCode) // ar/er and pr_opt diff
+        // fillColor: returnColor(stops[i]["wt_ar"] - stops[i]["wt_er"] , colorRamp, colorCode) // ar/er and pr_opt diff
 
       });
       cir.on("click",function(d){
-        console.log(d)
+        console.log(d.target.options)
+        console.log(d.target.options.stop_id,d.target.options.j, d.target.options.value, d.target.options.miss_rate)
       })
       
       cir.addTo(map);
