@@ -77,6 +77,17 @@ map.on("click", function (e) {
   // console.log(e)
 })
 
+L.control.scale({ position: "bottomleft" }).addTo(map);
+var north = L.control({ position: "topright" });
+north.onAdd = function (map) {
+  var div = L.DomUtil.create("div", "info");
+  div.id = 'north_arrow'
+  div.innerHTML = '<img style="height:120px;width:auto;" src="img/north_arrow.png">';
+  return div;
+}
+north.addTo(map);
+
+
 
 $(function () {
   $("form").submit(function () { return false; });
@@ -139,7 +150,7 @@ $("#start-btn").click(function () {
             color: "#000000",
             fillOpacity: 1,
             fillColor: returnColor(diff_time, colorWTRamp, colorWTCode)
-          });          
+          });
           cir.addTo(map);
 
         }
@@ -178,6 +189,7 @@ $("#start-3-btn").click(function () {
   var routeID = $("#route-3-input").val()
   var variableCode = $("#variable-3-input").val()
   var queryURL = "http://127.0.0.1:50033/" + routeID + '_stops_max'
+  // var queryURL = "http://127.0.0.1:50033/delay"
   console.log(queryURL)
 
   $.ajax({
@@ -199,8 +211,8 @@ function visualizationReduce(stops, variableCode) {
   var baseRadius = 84;
   var colorRamp, colorCode;
 
-  // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
-  // var colorRamp = [0, 150, 200, 250, 300, 350, 400, Infinity] // waiting time per se
+  // var colorRamp = [-Infinity, -120, -60, -30, 0, 30, 60, Infinity] // nr and pr_opt diff
+  // var colorRamp = [0, 150, 300, 400, 500, 600, 750, Infinity] // waiting time per se
   var colorRamp = [0, 120, 140, 160, 200, 225, 250, Infinity] // buffer
   // var colorRamp = [0, 2.5, 5, 10, 25, 50, 75, 100] // miss rate
   // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
@@ -212,7 +224,7 @@ function visualizationReduce(stops, variableCode) {
 
   for (var j = 9; j >= 0; j--) {
     for (var i = 0; i < stops.length; i++) {
-      var cir=L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
+      var cir = L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
         radius: baseRadius * j,
         stroke: true,
         weight: 0.2,
@@ -220,30 +232,70 @@ function visualizationReduce(stops, variableCode) {
         fillOpacity: 1,
         info: stops[i],
         stop_id: stops[i]["stop_id"],
+        delay:stops[i]["wt_nr"],
         j: j,
         value: stops[i][variableCode + "_" + j.toString()],
-        miss_rate :stops[i]["mc_pr_opt_" + j.toString()]/ stops[i]["total"]*100,
-        // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
-        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR and buffer
-        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt, RR difference
+        miss_rate: stops[i]["mc_pr_opt_" + j.toString()] / stops[i]["total"] * 100,
+        // fillColor: returnColor(stops[i]["delay"]/stops[i]["count"], colorRamp, colorCode) // Delay
+
+        fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
+        // fillColor: returnColor(stops[i]["wt_nr"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR difference
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
-        // fillColor: returnColor((stops[i]["mc_rr_"+ j.toString()] - stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
-        
+        // fillColor: returnColor((stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
+
         // fillColor: returnColor(stops[i]["wt_ar"] - stops[i]["wt_er"] , colorRamp, colorCode) // ar/er and pr_opt diff
 
       });
-      cir.on("click",function(d){
-        console.log(d.target.options)
-        console.log(d.target.options.stop_id,d.target.options.j, d.target.options.value, d.target.options.miss_rate)
+      cir.on("click", function (d) {
+        console.log(d.target.options.info[variableCode])
+        console.log(d.target.options.stop_id, d.target.options.j, d.target.options.value, d.target.options.miss_rate)
       })
-      
+
       cir.addTo(map);
-
-      console.log((stops[i]["mc_rr_"+ j.toString()] - stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"])
-
+      console.log((stops[i]["mc_rr_" + j.toString()] - stops[i][variableCode + "_" + j.toString()]) / stops[i]["total"])
     }
   }
+
+
+  var legend = L.control({ position: "bottomright" });
+  legend.onAdd = function (map) {
+    var div = L.DomUtil.create("div", "info legend");
+    div.id = 'legend'
+
+    var legendContent2 = "<span style='font-size:30;'>Legend</span>"
+    var title = "Delay (seconds)"
+    legendContent2 +="<h3>"+title+"</h3>"
+    legendContent2 += '<table><tbody>'
+    for (var i=0;i< colorCode.length;i++) {
+      console.log(i)
+      if (colorRamp[i] == -Infinity){
+        labelContent2 = "( -∞, " + colorRamp[i + 1] + ")";
+      }
+      else{
+        if (colorRamp[i+1] == Infinity){
+          labelContent2 = "["+colorRamp[i] + ", ∞ )";
+        }
+        else{
+          labelContent2 = "["+colorRamp[i] + ", " + colorRamp[i + 1] + ")";
+        }
+      }
+      legendContent2 += "<tr valign='middle'>" +
+        "<td class='tablehead' align='middle'>" + getColorBlockString(colorCode[i]) + "</td>" +
+        "<td class='tablecontent' align='right' style='width:180px;'><span style='width:90%;font-size:30;font:'>" + labelContent2 + "</span><td>" + "</tr>";
+    }
+    legendContent2 += "</tbody><table>";
+
+    div.innerHTML = legendContent2;
+    return div;
+  }
+  legend.addTo(map);
+}
+
+function getColorBlockString(color) {
+  var div = '<div class="legendbox" style="padding:0px;background:' + color + '"></div>'
+  return div;
 }
 
 function visualization(stops, variableCode) {

@@ -4,7 +4,7 @@ import datetime
 import multiprocessing
 
 import os
-import sys
+import sys, time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import transfer_tools
 client = MongoClient('mongodb://localhost:27017/')
@@ -19,6 +19,9 @@ def appendix_real_time(single_date):
     trip_dic = {}
 
     today_date = single_date.strftime("%Y%m%d")  # date
+    
+    today_date = single_date.strftime("%Y%m%d")  # date
+    today_seconds = int(time.mktime(time.strptime(today_date, "%Y%m%d")))
     today_weekday = single_date.weekday()  # day of week
     if today_weekday < 5:
         service_id = 1
@@ -31,7 +34,6 @@ def appendix_real_time(single_date):
         summer_time = 0
     else:
         summer_time = 1
-    today_seconds = int((single_date - date(1970, 1, 1)).total_seconds()) + 18000 + 3600*summer_time
     print(today_seconds)
     print(today_date, ": Start.")
 
@@ -56,14 +58,13 @@ def appendix_real_time(single_date):
             stop_dic[stop_id]
         except:
             stop_dic[stop_id] = {}
-            stop_query = list(db_stops.find({"stop_id": stop_id}))
-            if len(stop_query) == 0:
+            stop_query = (db_stops.find_one({"stop_id": stop_id}))
+            if (stop_query) == None:
                 stop_dic[stop_id]["lat"] = "stop_error"
                 stop_dic[stop_id]["lon"] = "stop_error"
                 stop_dic[stop_id]["stop_name"] = "stop_error"
                 stop_dic[stop_id]["stop_code"] = "stop_error"
             else:
-                stop_query = stop_query[0]
                 stop_dic[stop_id]["lat"] = stop_query["stop_lat"]
                 stop_dic[stop_id]["lon"] = stop_query["stop_lon"]
                 stop_dic[stop_id]["stop_name"] = stop_query["stop_name"]
@@ -73,15 +74,14 @@ def appendix_real_time(single_date):
             trip_dic[trip_id]
         except:
             trip_dic[trip_id] = {}
-            trip_query = list(db_trips.find({"trip_id": trip_id}))
-            if len(trip_query) == 0:
+            trip_query = (db_trips.find_one({"trip_id": trip_id}))
+            if (trip_query) == None:
                 trip_dic[trip_id]['block_id'] = "trip_error"
                 trip_dic[trip_id]['shape_id'] = "trip_error"
                 trip_dic[trip_id]['trip_headsign'] = "trip_error"
                 trip_dic[trip_id]['direction_id'] = "trip_error"
                 trip_dic[trip_id]['route_id'] = "trip_error"
             else:
-                trip_query = trip_query[0]
                 trip_dic[trip_id]['block_id'] = trip_query["block_id"]
                 trip_dic[trip_id]['shape_id'] = trip_query["shape_id"]
                 trip_dic[trip_id]['trip_headsign'] = trip_query["trip_headsign"]
@@ -90,21 +90,19 @@ def appendix_real_time(single_date):
                 trip_dic[trip_id]['route_id'] = int(
                     trip_query["route_id"])*(1-2*int(trip_query["direction_id"]))
 
-        stop_times_query = list(db_stop_times.find(
+        stop_times_query = (db_stop_times.find_one(
             {"trip_id": trip_id, "stop_id": stop_id}))
-        if len(stop_times_query) == 0:
+        if (stop_times_query) == None:
             stop_sequence = "stop_time_error"
         else:
-            stop_times_query = stop_times_query[0]
             stop_sequence = stop_times_query["stop_sequence"]
 
-        trip_seq_query = list(db_seq.find(
+        trip_seq_query = (db_seq.find_one(
             {"trip_id": trip_id, "stop_id": stop_id}))
-        if len(trip_seq_query) == 0:
+        if (trip_seq_query) == None:
             trip_sequence = "GTFS_error"
             scheduled_time = "GTFS_error"
         else:
-            trip_seq_query = trip_seq_query[0]
             trip_sequence = trip_seq_query["seq"]
             scheduled_time = int(trip_seq_query["time"]) + today_seconds
 

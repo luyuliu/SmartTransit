@@ -253,3 +253,24 @@
 .cota-color-5 {
   color: #ffffcc
 }
+
+
+.leaflet-bottom .leaflet-control-scale {
+  margin-bottom:80px;
+  margin-left: 350px;
+  
+}
+
+.leaflet-control-scale-line{
+  font-size: 20;
+}
+
+#north_arrow{
+  margin-right: 270px;
+}
+
+#legend{
+  width: 240px;
+  margin-bottom: 250px;
+  margin-right: 270px;
+}
