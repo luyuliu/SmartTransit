@@ -40,7 +40,7 @@ def reduce_diff(start_date, end_date):
 
         that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
         rl_opt_result = list(
-            db_real_time['R' + today_date].find({"route_id": -2}))
+            db_real_time['R' + today_date].find({"route_id": 1}))
         # db_stops = db_GTFS[str(that_time_stamp) + "_stops"]
         # db_trips = db_GTFS[str(that_time_stamp) + "_trips"]
         # db_stop_times = db_GTFS[str(that_time_stamp) + "_stop_times"]
@@ -57,6 +57,7 @@ def reduce_diff(start_date, end_date):
             except:
                 dic_stops[stop_id] = {}
                 dic_stops[stop_id]["stop_id"] = stop_id
+                dic_stops[stop_id]["stop_sequence"] = each_record["stop_sequence"]
                 dic_stops[stop_id]["delay"] = 0
                 dic_stops[stop_id]["count"] = 0
                 dic_stops[stop_id]["lat"] = each_record["lat"]

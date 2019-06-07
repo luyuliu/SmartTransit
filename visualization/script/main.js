@@ -275,6 +275,7 @@ function visualizationReduce(stops, variableCode) {
         fillOpacity: 1,
         info: stops[i],
         stop_id: stops[i]["stop_id"],
+        stop_sequence: stops[i]["stop_sequence"],
         delay: stops[i]["wt_nr"],
         j: j,
         value: stops[i][variableCode + "_" + j.toString()],
@@ -293,7 +294,7 @@ function visualizationReduce(stops, variableCode) {
       });
       cir.on("click", function (d) {
         console.log(d.target.options.info["delay"] / d.target.options.info["count"])
-        console.log(d.target.options.stop_id, d.target.options.j, d.target.options.value, d.target.options.miss_rate)
+        console.log(d.target.options.stop_id,d.target.options.stop_sequence, d.target.options.j, d.target.options.value, d.target.options.miss_rate)
       })
 
       cir.addTo(map);
