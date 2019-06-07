@@ -23,12 +23,13 @@ db_er = client.cota_er
 db_diff = client.cota_diff
 db_diff_reduce = client.cota_diff_reduce
 
-walking_time_limit = 10 # min
-criteria = 5 # seconds
+walking_time_limit = 10  # min
+criteria = 5  # seconds
 designated_route_id = 2
 
+
 def reduce_diff(start_date, end_date):
-    date_range =transfer_tools.daterange(start_date, end_date)
+    date_range = transfer_tools.daterange(start_date, end_date)
     db_diff_reduce["delay"].drop()
 
     dic_stops = {}
@@ -38,7 +39,8 @@ def reduce_diff(start_date, end_date):
         col_diff = db_diff[today_date]
 
         that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
-        rl_opt_result = list(db_real_time['R'+today_date].find({"route_id": -2}))
+        rl_opt_result = list(
+            db_real_time['R' + today_date].find({"route_id": -2}))
         # db_stops = db_GTFS[str(that_time_stamp) + "_stops"]
         # db_trips = db_GTFS[str(that_time_stamp) + "_trips"]
         # db_stop_times = db_GTFS[str(that_time_stamp) + "_stop_times"]
@@ -59,8 +61,9 @@ def reduce_diff(start_date, end_date):
                 dic_stops[stop_id]["count"] = 0
                 dic_stops[stop_id]["lat"] = each_record["lat"]
                 dic_stops[stop_id]["lon"] = each_record["lon"]
-            
+
             if type(time_actual) is not int or type(time_normal) is not int:
+                print(time_actual, time_normal)
                 continue
             dic_stops[stop_id]["delay"] += time_actual - time_normal
             dic_stops[stop_id]["count"] += 1
@@ -69,13 +72,10 @@ def reduce_diff(start_date, end_date):
     for index, each_record in dic_stops.items():
         db_diff_reduce["delay"].insert_one(each_record)
 
-        
-
-
 
 if __name__ == "__main__":
-    start_date = date(2018, 1,29)
-    end_date = date(2018,3, 2)
+    start_date = date(2018, 2, 1)
+    end_date = date(2018, 2, 2)
     reduce_diff(start_date, end_date)
 
     # Todo: find skip reason

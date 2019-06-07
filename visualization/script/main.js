@@ -123,8 +123,8 @@ $("#down-btn").click(function () {
 $("#start-btn").click(function () {
   var todayDate = $("#date-input").val().replace('-', '').replace('-', '')
   console.log(todayDate)
-  var routeID = $("#route-input").val()
-  var queryURL = "http://127.0.0.1:50031/" + routeID
+  var tripID = $("#trip-input").val()
+  var queryURL = "http://127.0.0.1:32154/R" + todayDate + '?where={"trip_id":"' + tripID + '"}'
   console.log(queryURL)
 
   $.ajax({
@@ -140,56 +140,99 @@ $("#start-btn").click(function () {
 
       var baseRadius = 84;
 
-      for (var j = 9; j >= 0; j--) {
-        for (var i = 0; i < stops.length; i++) {
-          diff_time = stops[i]["wt_dif_" + j]
-          var cir = L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
-            radius: baseRadius * j,
-            stroke: true,
-            weight: 0.2,
-            color: "#000000",
-            fillOpacity: 1,
-            fillColor: returnColor(diff_time, colorWTRamp, colorWTCode)
-          });
-          cir.addTo(map);
+      var colorRamp = [0, 30, 60, 120, 150, 270, 360, Infinity] // red is waiting more time; blue is saving more time
+      var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
 
-        }
+      for (var i = 0; i < stops.length; i++) {
+        diff_time = stops[i]["time"] - stops[i]["scheduled_time"]
+        var cir = L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
+          radius: baseRadius * 3,
+          stroke: true,
+          weight: 0.2,
+          color: "#000000",
+          fillOpacity: 1,
+          info: stops[i],
+          fillColor: returnColor(diff_time, colorRamp, colorCode)
+        });
+
+        cir.on("mouseover", function (d) {
+          var popup = L.popup()
+            .setLatLng([parseFloat(d.target.options.info.lat), parseFloat(d.target.options.info.lon)])
+            .setContent("<span>Stop sequence: " + d.target.options.info["stop_sequence"] + "</span></br><span>Delay: " + (d.target.options.info["time"] - d.target.options.info["scheduled_time"] ) + "s</span>")
+            .openOn(map);
+          console.log(d.target.options.info["stop_sequence"])
+        })
+        cir.addTo(map);
+
       }
+
+      var legend = L.control({ position: "bottomright" });
+      legend.onAdd = function (map) {
+        var div = L.DomUtil.create("div", "info legend");
+        div.id = 'legend'
+
+        var legendContent2 = "<span style='font-size:30;'>Legend</span>"
+        var title = "Delay (seconds)"
+        legendContent2 += "<h3>" + title + "</h3>"
+        legendContent2 += '<table><tbody>'
+        for (var i = 0; i < colorCode.length; i++) {
+          console.log(i)
+          if (colorRamp[i] == -Infinity) {
+            labelContent2 = "( -∞, " + colorRamp[i + 1] + ")";
+          }
+          else {
+            if (colorRamp[i + 1] == Infinity) {
+              labelContent2 = "[" + colorRamp[i] + ", ∞ )";
+            }
+            else {
+              labelContent2 = "[" + colorRamp[i] + ", " + colorRamp[i + 1] + ")";
+            }
+          }
+          legendContent2 += "<tr valign='middle'>" +
+            "<td class='tablehead' align='middle'>" + getColorBlockString(colorCode[i]) + "</td>" +
+            "<td class='tablecontent' align='right' style='width:180px;'><span style='width:90%;font-size:30;font:'>" + labelContent2 + "</span><td>" + "</tr>";
+        }
+        legendContent2 += "</tbody><table>";
+
+        div.innerHTML = legendContent2;
+        return div;
+      }
+      legend.addTo(map);
     }
   });
 
 });
 
 
-$("#start-opt-btn").click(function () {
-  var todayDate = $("#date-pr-input").val().replace('-', '').replace('-', '')
-  console.log(todayDate)
-  var routeID = $("#route-pr-input").val()
-  var variableCode = $("#variable-pr-input").val()
-  var queryURL = "http://127.0.0.1:50032/" + todayDate + '_route_reduced?where={"route_id":' + routeID + '}'
-  console.log(queryURL)
+// $("#start-opt-btn").click(function () {
+//   var todayDate = $("#date-pr-input").val().replace('-', '').replace('-', '')
+//   console.log(todayDate)
+//   var routeID = $("#route-pr-input").val()
+//   var variableCode = $("#variable-pr-input").val()
+//   var queryURL = "http://127.0.0.1:50032/" + todayDate + '_route_reduced?where={"route_id":' + routeID + '}'
+//   console.log(queryURL)
 
-  $.ajax({
-    url: queryURL,
-    type: "GET",
-    beforeSend: function (xhr) {
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.setRequestHeader('X-Content-Type-Options', 'nosniff');
-    },
-    success: function (rawstops) {
-      var stops = rawstops._items
-      console.log(stops)
-      visualization(stops, variableCode);
-    }
-  });
+//   $.ajax({
+//     url: queryURL,
+//     type: "GET",
+//     beforeSend: function (xhr) {
+//       xhr.setRequestHeader('Content-Type', 'application/json');
+//       xhr.setRequestHeader('X-Content-Type-Options', 'nosniff');
+//     },
+//     success: function (rawstops) {
+//       var stops = rawstops._items
+//       console.log(stops)
+//       visualization(stops, variableCode);
+//     }
+//   });
 
-});
+// });
 
 $("#start-3-btn").click(function () {
   var routeID = $("#route-3-input").val()
   var variableCode = $("#variable-3-input").val()
-  var queryURL = "http://127.0.0.1:50033/" + routeID + '_stops_max'
-  // var queryURL = "http://127.0.0.1:50033/delay"
+  // var queryURL = "http://127.0.0.1:50033/" + routeID + '_stops_max'
+  var queryURL = "http://127.0.0.1:50033/delay"
   console.log(queryURL)
 
   $.ajax({
@@ -232,13 +275,13 @@ function visualizationReduce(stops, variableCode) {
         fillOpacity: 1,
         info: stops[i],
         stop_id: stops[i]["stop_id"],
-        delay:stops[i]["wt_nr"],
+        delay: stops[i]["wt_nr"],
         j: j,
         value: stops[i][variableCode + "_" + j.toString()],
         miss_rate: stops[i]["mc_pr_opt_" + j.toString()] / stops[i]["total"] * 100,
-        // fillColor: returnColor(stops[i]["delay"]/stops[i]["count"], colorRamp, colorCode) // Delay
+        fillColor: returnColor(stops[i]["delay"] / stops[i]["count"], colorRamp, colorCode) // Delay
 
-        fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
+        // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
         // fillColor: returnColor(stops[i]["wt_nr"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR difference
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
@@ -249,7 +292,7 @@ function visualizationReduce(stops, variableCode) {
 
       });
       cir.on("click", function (d) {
-        console.log(d.target.options.info[variableCode])
+        console.log(d.target.options.info["delay"] / d.target.options.info["count"])
         console.log(d.target.options.stop_id, d.target.options.j, d.target.options.value, d.target.options.miss_rate)
       })
 
@@ -266,19 +309,19 @@ function visualizationReduce(stops, variableCode) {
 
     var legendContent2 = "<span style='font-size:30;'>Legend</span>"
     var title = "Delay (seconds)"
-    legendContent2 +="<h3>"+title+"</h3>"
+    legendContent2 += "<h3>" + title + "</h3>"
     legendContent2 += '<table><tbody>'
-    for (var i=0;i< colorCode.length;i++) {
+    for (var i = 0; i < colorCode.length; i++) {
       console.log(i)
-      if (colorRamp[i] == -Infinity){
+      if (colorRamp[i] == -Infinity) {
         labelContent2 = "( -∞, " + colorRamp[i + 1] + ")";
       }
-      else{
-        if (colorRamp[i+1] == Infinity){
-          labelContent2 = "["+colorRamp[i] + ", ∞ )";
+      else {
+        if (colorRamp[i + 1] == Infinity) {
+          labelContent2 = "[" + colorRamp[i] + ", ∞ )";
         }
-        else{
-          labelContent2 = "["+colorRamp[i] + ", " + colorRamp[i + 1] + ")";
+        else {
+          labelContent2 = "[" + colorRamp[i] + ", " + colorRamp[i + 1] + ")";
         }
       }
       legendContent2 += "<tr valign='middle'>" +
@@ -334,9 +377,6 @@ function dataTransformation(variableCode, stops, i, j) {
   return diff_time;
 }
 
-
-var colorWTRamp = [-Infinity, -80, -46, -13, 0, 43, Infinity] // red is waiting more time; blue is saving more time
-var colorWTCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000"]
 
 var ave_buffRamp = [0, 10, 20, 30, 45, 60, 90, Infinity]
 var ave_buffCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#000000"]

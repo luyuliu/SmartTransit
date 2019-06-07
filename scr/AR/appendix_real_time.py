@@ -88,7 +88,7 @@ def appendix_real_time(single_date):
                 trip_dic[trip_id]['direction_id'] = int(
                     trip_query["direction_id"])
                 trip_dic[trip_id]['route_id'] = int(
-                    trip_query["route_id"])*(1-2*int(trip_query["direction_id"]))
+                    trip_query["route_id"])*(1-2*int(trip_query["direction_id"])) # 0->1; 1->-1
 
         stop_times_query = (db_stop_times.find_one(
             {"trip_id": trip_id, "stop_id": stop_id}))
@@ -127,8 +127,8 @@ def appendix_real_time(single_date):
 
 
 if __name__ == "__main__":
-    start_date = date(2018, 1, 29)
-    end_date = date(2019, 1, 30)
+    start_date = date(2018,2, 1)
+    end_date = date(2018, 2, 2)
 
     # appendix_real_time(start_date)
     col_list_real_time = transfer_tools.daterange(start_date, end_date)
