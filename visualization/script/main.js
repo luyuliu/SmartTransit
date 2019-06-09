@@ -231,8 +231,8 @@ $("#start-btn").click(function () {
 $("#start-3-btn").click(function () {
   var routeID = $("#route-3-input").val()
   var variableCode = $("#variable-3-input").val()
-  // var queryURL = "http://127.0.0.1:50033/" + routeID + '_stops_max'
-  var queryURL = "http://127.0.0.1:50033/delay"
+  var queryURL = "http://127.0.0.1:50033/" + routeID + '_stops_max'
+  // var queryURL = "http://127.0.0.1:50033/delay"
   console.log(queryURL)
 
   $.ajax({
@@ -255,8 +255,8 @@ function visualizationReduce(stops, variableCode) {
   var colorRamp, colorCode;
 
   // var colorRamp = [-Infinity, -120, -60, -30, 0, 30, 60, Infinity] // nr and pr_opt diff
-  // var colorRamp = [0, 150, 300, 400, 500, 600, 750, Infinity] // waiting time per se
-  var colorRamp = [0, 120, 140, 160, 200, 225, 250, Infinity] // buffer
+  var colorRamp = [0, 150, 200, 300, 450, 600, 750, Infinity] // waiting time per se
+  // var colorRamp = [0, 120, 140, 160, 200, 225, 250, Infinity] // buffer
   // var colorRamp = [0, 2.5, 5, 10, 25, 50, 75, 100] // miss rate
   // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
   // var colorRamp = [-Infinity, 0, 200, 300, 400, 500, 600, Infinity] // rr and pr_opt diff
@@ -280,10 +280,10 @@ function visualizationReduce(stops, variableCode) {
         j: j,
         value: stops[i][variableCode + "_" + j.toString()],
         miss_rate: stops[i]["mc_pr_opt_" + j.toString()] / stops[i]["total"] * 100,
-        fillColor: returnColor(stops[i]["delay"] / stops[i]["count"], colorRamp, colorCode) // Delay
+        // fillColor: returnColor(stops[i]["delay"] / stops[i]["count"], colorRamp, colorCode) // Delay
 
         // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
-        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
+        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
         // fillColor: returnColor(stops[i]["wt_nr"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR difference
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
@@ -309,7 +309,7 @@ function visualizationReduce(stops, variableCode) {
     div.id = 'legend'
 
     var legendContent2 = "<span style='font-size:30;'>Legend</span>"
-    var title = "Delay (seconds)"
+    var title = "PR optimal Waiting time (seconds)"
     legendContent2 += "<h3>" + title + "</h3>"
     legendContent2 += '<table><tbody>'
     for (var i = 0; i < colorCode.length; i++) {
