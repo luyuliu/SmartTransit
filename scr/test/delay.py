@@ -33,14 +33,17 @@ def reduce_diff(start_date, end_date):
     db_diff_reduce["delay"].drop()
 
     dic_stops = {}
+    delay = [0] * 7
+    count = [0] * 7
     for single_date in date_range:
 
         today_date = single_date.strftime("%Y%m%d")  # date
         col_diff = db_diff[today_date]
+        today_weekday = single_date.weekday()
 
         that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
         rl_opt_result = list(
-            db_real_time['R' + today_date].find({"route_id": 1}))
+            db_real_time['R' + today_date].find({"$or":[{"route_id": 2}, {"route_id": -2}]}))
         # db_stops = db_GTFS[str(that_time_stamp) + "_stops"]
         # db_trips = db_GTFS[str(that_time_stamp) + "_trips"]
         # db_stop_times = db_GTFS[str(that_time_stamp) + "_stop_times"]
@@ -48,6 +51,9 @@ def reduce_diff(start_date, end_date):
         # col_real_time = db_real_time["R" + today_date]
         # col_trip_update = db_trip_update[today_date]
 
+        this_error_count = 0
+        this_total_count = 0
+        this_delay = 0
         for each_record in rl_opt_result:
             stop_id = each_record["stop_id"]
             time_actual = each_record["time"]
@@ -64,19 +70,29 @@ def reduce_diff(start_date, end_date):
                 dic_stops[stop_id]["lon"] = each_record["lon"]
 
             if type(time_actual) is not int or type(time_normal) is not int:
-                print(time_actual, time_normal)
+                # print(time_actual, time_normal)
+                this_error_count +=1
                 continue
             dic_stops[stop_id]["delay"] += time_actual - time_normal
             dic_stops[stop_id]["count"] += 1
-        print(today_date)
 
+            this_delay += time_actual - time_normal
+            this_total_count += 1
+        delay[today_weekday] += this_delay
+        count[today_weekday] += this_total_count
+        print(today_date, this_total_count, this_error_count, this_delay)
+
+    for i in range(7):
+        delay[today_weekday] = delay[today_weekday]/count[today_weekday]
+    
+    print(delay, count)
     for index, each_record in dic_stops.items():
         db_diff_reduce["delay"].insert_one(each_record)
 
 
 if __name__ == "__main__":
     start_date = date(2018, 2, 1)
-    end_date = date(2018, 2, 2)
+    end_date = date(2019, 1, 31)
     reduce_diff(start_date, end_date)
 
     # Todo: find skip reason

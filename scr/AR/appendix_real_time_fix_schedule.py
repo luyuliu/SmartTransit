@@ -26,7 +26,7 @@ def appendix_real_time(single_date):
         service_id = 3
 
     print(today_seconds)
-    print(today_date, ": Start.")
+    # print(today_date, ": Start.")
 
     that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
     db_seq = db_GTFS[str(that_time_stamp)+"_trip_seq"]
@@ -55,22 +55,22 @@ def appendix_real_time(single_date):
 
         col_real_time.update_one(original_query, update_object)
         count += 1
-        if count % 10000 == 1:
+        if count % 100000 == 1:
             print(today_date, ": ", count/total_count*100)
     print(today_date, ": Done.")
 
 
 if __name__ == "__main__":
     start_date = date(2018, 1, 30)
-    end_date = date(2018, 1, 31)
+    end_date = date(2019, 1, 31)
 
-    appendix_real_time(start_date)
-    # col_list_real_time = transfer_tools.daterange(start_date, end_date)
+    # appendix_real_time(start_date)
+    col_list_real_time = transfer_tools.daterange(start_date, end_date)
 
-    # cores = int(multiprocessing.cpu_count()/4*3)
-    # pool = multiprocessing.Pool(processes=cores)
-    # date_range = transfer_tools.daterange(start_date, end_date)
-    # output = []
-    # output = pool.map(appendix_real_time, date_range)
-    # pool.close()
-    # pool.join()
+    cores = int(multiprocessing.cpu_count()/4*3)
+    pool = multiprocessing.Pool(processes=cores)
+    date_range = transfer_tools.daterange(start_date, end_date)
+    output = []
+    output = pool.map(appendix_real_time, date_range)
+    pool.close()
+    pool.join()
