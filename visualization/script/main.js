@@ -254,8 +254,8 @@ function visualizationReduce(stops, variableCode) {
   var baseRadius = 84;
   var colorRamp, colorCode;
 
-  // var colorRamp = [-Infinity, -120, -60, -30, 0, 30, 60, Infinity] // nr and pr_opt diff
-  var colorRamp = [0, 150, 200, 300, 450, 600, 750, Infinity] // waiting time per se
+  var colorRamp = [-Infinity, -120, -60, -30, 0, 30, 60, Infinity] // nr and pr_opt diff
+  // var colorRamp = [0, 150, 200, 300, 450, 600, 750, Infinity] // waiting time per se
   // var colorRamp = [0, 120, 140, 160, 200, 225, 250, Infinity] // buffer
   // var colorRamp = [0, 2.5, 5, 10, 25, 50, 75, 100] // miss rate
   // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
@@ -283,8 +283,8 @@ function visualizationReduce(stops, variableCode) {
         // fillColor: returnColor(stops[i]["delay"] / stops[i]["count"], colorRamp, colorCode) // Delay
 
         // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
-        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
-        // fillColor: returnColor(stops[i]["wt_nr"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR difference
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
+        fillColor: returnColor(stops[i]["wt_nr"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // PR_opt, RR difference
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
         // fillColor: returnColor((stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
