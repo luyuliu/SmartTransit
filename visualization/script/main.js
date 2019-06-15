@@ -309,7 +309,7 @@ function visualizationReduce(stops, variableCode) {
     div.id = 'legend'
 
     var legendContent2 = "<span style='font-size:30;'>Legend</span>"
-    var title = "PR optimal Waiting time (seconds)"
+    var title = "NR - PR optimal Waiting time difference (seconds)"
     legendContent2 += "<h3>" + title + "</h3>"
     legendContent2 += '<table><tbody>'
     for (var i = 0; i < colorCode.length; i++) {
