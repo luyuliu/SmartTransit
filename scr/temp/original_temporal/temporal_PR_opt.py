@@ -40,7 +40,7 @@ def reduce_diff(start_date, end_date):
             
         wt_gr = [0] * 10
         wt_gr_count =[0] * 10
-
+        large_count = 0
         for each_record in rl_opt_result:
             for i in range(10):
                 try:
@@ -52,19 +52,24 @@ def reduce_diff(start_date, end_date):
                 if type(time_gr_alt) is int and type(time_gr_arr) is int and time_gr_alt != 0 and time_gr_arr != 0:
                     wt_gr[i] += time_gr_alt - time_gr_arr
                     wt_gr_count[i] += 1
+
+                    if time_gr_alt - time_gr_arr > 60*60*1:
+                        large_count += 1
+                        print((time_gr_alt - time_gr_arr)/60)
+                        print(each_record["route_id"])
         
         for i in range(10):
             if wt_gr_count[0] != 0:
                 wt_gr[i] = (wt_gr[i]/wt_gr_count[i])
 
-        print(today_date, wt_gr[0], wt_gr[1],wt_gr[2],wt_gr[3],wt_gr[4],wt_gr[5],wt_gr[6],wt_gr[7],wt_gr[8],wt_gr[9],)
-
+        # print(today_date,large_count, wt_gr[0], wt_gr[1],wt_gr[2],wt_gr[3],wt_gr[4],wt_gr[5],wt_gr[6],wt_gr[7],wt_gr[8],wt_gr[9],)
+        print(today_date,large_count)
     
 
 
 if __name__ == "__main__":
-    start_date = date(2018, 2, 1)
-    end_date = date(2019, 1, 31)
+    start_date = date(2018, 8, 31)
+    end_date = date(2018, 9, 5)
     reduce_diff(start_date, end_date)
 
     # Todo: find skip reason

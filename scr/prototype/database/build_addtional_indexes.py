@@ -35,6 +35,9 @@ db_er = client.cota_er
 col_er = db_er.er
 col_er.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
 
+db_trip_update = client.trip_update
+col_trip_update = db_trip_update.full_trip_update
+col_trip_update.create_index([("start_date", ASCENDING)])
 
 db_real_time = client.cota_real_time
 db_diff = client.cota_diff
