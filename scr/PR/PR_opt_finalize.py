@@ -3,6 +3,7 @@
 # The result is store in the cota_pr_optimization_result database. Each collection's name is date + "pr_opt" 
 
 from pymongo import MongoClient
+import pymongo
 from datetime import timedelta, date
 import datetime
 import multiprocessing
@@ -69,6 +70,8 @@ def calculate_parameters(start_date, end_date):
         for each_stop, each_record in stop_collection.items():
             db_opt_result["pr_opt_ibs_risk_averse"].insert_one(each_record)
     
+    db_opt_result["pr_opt_ibs_risk_averse"].create_index([("trip_id", pymongo.ASCENDING), ("stop_id", pymongo.ASCENDING)])
+
 
 
 if __name__ == '__main__':
