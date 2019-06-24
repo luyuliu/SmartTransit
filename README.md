@@ -7,7 +7,7 @@ Before executing the codes, please make sure you install MongoDB, Python (and py
 To execute the codes, you should have several Mongo Databases ready.
 
 ### 1. GTFS Real-time ###
-1.1. You need to collect data from the streaming website. Better solution will be a server with python script catching real-time feed and add to a Mongodb database.<br />
+1.1. You need to collect data from the streaming API. Better solution will be a server with python script catching real-time feed and add to a Mongodb database.<br />
 1.2. After getting the huge streaming database, run scr/database/divide_collection.py to divide the huge collection into several individual collection of each day.<br />
 1.3. Then, run find_real_time.py to find the most accurate time from the real-time data.<br />
 <br />
@@ -15,13 +15,14 @@ After running all of these above, you should be able to get a database of each d
 
 ### 2. GTFS Static
 2.1. Get GTFS static from an online source (a zip file) and store it to a Mongo database with each file in the zip as a collection.
-2.2. You may want to revise these scripts since pratically I did not write these scripts. I only use these data exported from the data server. I used "collection_name"+ "_"+timestamp to name the collection to avoid ambiguous naming. The timestamp is the time when the gtfs static changed.
+2.2. You may want to revise these scripts since pratically I did not write these scripts. I only use these data exported from the data server. I used "collection_name"+ "_"+timestamp to name the collection to avoid ambiguous naming. The timestamp is the time when the gtfs static changed. <br />
+3.2 Create indexes. Indexes can magnificantly improve the performance of those scripts. Try run scr/database/create_indexes.py.<br />
 
 ### 3. Additional GTFS Static
 After finishing II:
 3.1. Run scr/transfer/sort_stop_time.py to generate the trip_seq collection, which represents the sequence of each route's trips. 
-For example, route 1 will go through stop "RIVHOSW". And there will be several different buses with different trip_id. Then trip_seq collection is to record these trips' temporal sequence at this stop. The sequence will start from 0.
-3.2 Create indexes. Indexes can magnificantly improve the performance of those scripts. Try run scr/database/create_indexes.py.
+For example, route 1 will go through stop "RIVHOSW". And there will be several different buses with different trip_id. Then trip_seq collection is to record these trips' temporal sequence at this stop. The sequence will start from 0.<br />
+3.2 Create indexes, again. Indexes can magnificantly improve the performance of those scripts. Try run scr/database/create_indexes.py.<br />
 
 ## Project scopes ##
 
@@ -56,19 +57,14 @@ For each buffer In the possible buffer list:<br />
 
 **PR_opt_optimize.py**: After validating each stop_time in GTFS, find the optimal one with minimal waiting time for each stop_time.
 
-**PR_opt_finalize.py**: Then, reduce every day's optimal IB into a day's schedule. Using average reducing rules.
+**PR_opt_finalize.py**: Then, reduce every day's optimal IB into a day's schedule. Using average/maximum reducing rules.
 
 **PR_opt_revalidate.py**: Validate every day's stop_time again to test the effectiveness of the PR optimal strategy.
 
-### 2. Cross-compare different TPSs' waiting time difference
+Find corresponding TPS's code in their folder and database when analyzing. E.g.: AR (scr/AR, cota_ar), ER, PR (cota_pr_optimization_result). If you need GR (RR), just use 
 
-**Todos**:
-PR optimal versus ER/NR/AR and
-RR optimal versus ER/NR/AR
+### 2. Cross-compare different TPSs' waiting time difference
+Find codes in TPSs in 
 
 ### 3. Visualization of waiting time, waiting time difference, and IBs.
-
-Todo: TPSs' waiting time;
-waiting time difference.
-IB
 
