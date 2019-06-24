@@ -75,7 +75,7 @@ For each buffer In the possible buffer list:<br />
 
 **PR_opt_optimize.py**: After validating each stop_time in GTFS, find the optimal one with minimal waiting time for each stop_time.
 Run this code and the optimized results (minimal waiting time and corresponding IB) will be stored in cota_pr_optimization_result database with collection name of todaydate + "_opt_risk_averse".
-You may encounter historic version of todaydate + "_opt", which is derived by averaging and not useable anymore.
+You may encounter historic version of todaydate + "_opt", which is derived by averaging and not useable anymore. Will create index (stop_id and trip_id).
 
 **PR_opt_finalize.py**: Then, reduce every day's optimal IB into a day's schedule. Using maximum reducing rules. We tried average rule, but turns out the miss risk is high. <br />The results will be stored in the cota_pr_optimization_result database with collection name of pr_opt_ibs_risk_averse. The legacy version of "pr_opt_ibs" is not useful.
 
