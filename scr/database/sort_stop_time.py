@@ -8,6 +8,11 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import transfer_tools
 
+
+def sortArray(A):
+    return A["time"]
+
+
 # database setup
 client = pymongo.MongoClient('mongodb://localhost:27017/')
 db_GTFS = client.cota_gtfs
@@ -23,7 +28,11 @@ for each_raw in db_time_stamps_set:
     db_time_stamps.append(each_raw)
 db_time_stamps.sort()
 
+schedule_count = 0
+total_schedule_count = len(db_time_stamps)
+
 for each_time_stamp in db_time_stamps:
+    schedule_count += 1
     db_seq=db_GTFS[str(each_time_stamp)+"_trip_seq"]
     db_stops=db_GTFS[str(each_time_stamp)+"_stops"]
     db_stop_times=db_GTFS[str(each_time_stamp)+"_stop_times"]
@@ -31,7 +40,7 @@ for each_time_stamp in db_time_stamps:
 
     pre_count = db_seq.estimated_document_count()
     if pre_count != 0:
-        print("-----------------------","Skip: ",each_time_stamp,"-----------------------")
+        print("-----------------------","Skip: ",each_time_stamp,schedule_count,total_schedule_count, "-----------------------")
         continue
 
     query_stop_time=list(db_stop_times.find({},no_cursor_timeout=True))
@@ -42,7 +51,7 @@ for each_time_stamp in db_time_stamps:
     total_seq_stop_time=[]
 
 
-    print("-----------------------","FindDone","-----------------------")
+    print("-----------------------","FindDone: ",each_time_stamp,schedule_count,total_schedule_count,"-----------------------")
     for each_stop_time in query_stop_time:
         seq_stop_time={}
         seq_stop_time["stop_id"]=each_stop_time["stop_id"]
@@ -78,11 +87,11 @@ for each_time_stamp in db_time_stamps:
         else:
             pass
         A[seq_stop_time["service_id"]][seq_stop_time["stop_id"]][seq_stop_time["route_id"]].append({"trip_id":seq_stop_time["trip_id"],"time":seq_stop_time["time"]})
-        A[seq_stop_time["service_id"]][seq_stop_time["stop_id"]][seq_stop_time["route_id"]].sort(key=transfer_tools.sortArray)
+        A[seq_stop_time["service_id"]][seq_stop_time["stop_id"]][seq_stop_time["route_id"]].sort(key=sortArray)
         total_seq_stop_time.append(seq_stop_time)
         B+=1
 
-    print("-----------------------","SearchDone","-----------------------")
+    print("-----------------------","SearchDone: ",each_time_stamp,schedule_count,total_schedule_count,"-----------------------")
 
     for seq_stop_time in total_seq_stop_time:
         index=A[seq_stop_time["service_id"]][seq_stop_time["stop_id"]][seq_stop_time["route_id"]].index({"trip_id":seq_stop_time["trip_id"],"time":seq_stop_time["time"]})

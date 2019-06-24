@@ -50,6 +50,12 @@ def convert_to_timestamp(time_string, single_date):
 
     return total_second+today_seconds
 
+def convertSeconds(BTimeString):
+    time = BTimeString.split(":")
+    hours = int(time[0])
+    minutes = int(time[1])
+    seconds = int(time[2])
+    return hours * 3600 + minutes * 60 + seconds
 
 def sortQuery(A):
     return A["seq"]
