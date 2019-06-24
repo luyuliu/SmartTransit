@@ -85,8 +85,13 @@ The result will be in cota_pr_optimization database with collection name of toda
 Find corresponding TPS's code in their folder and database when analyzing. E.g.: AR (scr/AR, cota_ar), ER (scr/ER, cota_er), PR_optimal (scr/PR, cota_pr_optimization_result/today_date + "_reval_max"). If you need GR (RR), just use collection with name of today_date + "_0" in the cota_pr_optimization database.
 
 ### 2. Cross-compare different TPSs' waiting time difference
-The codes is in scr/diff. 
-diff_join_risk_averse
+The codes is in scr/diff. <br />
+First, you need to run diff_join to join other TPSs' validated results to the PR optimal's table and insert the new table to database *cota_diff* and collection *"MX_" + today_date*.
+Second, reduce daily raw data into a single table. The results will be stored in database *cota_diff_reduced*. Max is always the right one. The database of *cota_diff_reduced* is also the database for the REST API.
 
 ### 3. Visualization of waiting time, waiting time difference, and IBs.
+Due to the special purposes of this project, I did not know any existing interface that can effectively visualize these data. This is exactly the purpose of the visualization. Subsequently, I developed this web-based interface.<br />
+To make it working, you need to first install a python library Eve, which is a Python REST API library.
+Then, open visualization/REST_API to open an entry for an database. The code run.py will stream all collection in the database, explicitly.<br />
 
+For more information, edit main.js to modify the functionality. I used Bootleaf templete.
