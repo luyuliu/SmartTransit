@@ -17,9 +17,7 @@ db_trip_update = client.trip_update
 def appendix_real_time(single_date):
     stop_dic = {}
     trip_dic = {}
-
-    today_date = single_date.strftime("%Y%m%d")  # date
-    
+   
     today_date = single_date.strftime("%Y%m%d")  # date
     today_seconds = int(time.mktime(time.strptime(today_date, "%Y%m%d")))
     today_weekday = single_date.weekday()  # day of week
