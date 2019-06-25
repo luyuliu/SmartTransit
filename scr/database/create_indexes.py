@@ -17,8 +17,8 @@ for each_time_stamp in transfer_tools.db_time_stamps:
     db_seq = transfer_tools.db_GTFS[str(each_time_stamp) + "_trip_seq"]
 
     db_stop_times.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
-    # db_seq.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
-    # db_seq.create_index([("service_id", ASCENDING),("seq", ASCENDING),("route_id", ASCENDING),("stop_id", ASCENDING)])
+    db_seq.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
+    db_seq.create_index([("service_id", ASCENDING),("seq", ASCENDING),("route_id", ASCENDING),("stop_id", ASCENDING)])
     db_stops.create_index([("stop_id", ASCENDING)])
     db_trips.create_index([("service_id", ASCENDING), ("trip_id", ASCENDING)])
     db_trips.create_index([("service_id", ASCENDING), ("route_id", ASCENDING)])
@@ -26,16 +26,16 @@ for each_time_stamp in transfer_tools.db_time_stamps:
 
 ###################### GTFS real-time indexes ######################
 
-# db_real_time = client.cota_real_time
-# db_diff = client.cota_diff
+db_real_time = client.cota_real_time
+db_diff = client.cota_diff
 
-# start_date = date(2019, 1, 31)
-# end_date = date(2019, 6, 20)
-# date_range = transfer_tools.daterange(start_date, end_date)
-# for each_date in date_range:
-#     today_date = each_date.strftime("%Y%m%d")  # date
-#     col_real_time = db_real_time["R" + today_date]
-#     col_real_time.create_index([("stop_id", ASCENDING),("route_id", ASCENDING)])
+start_date = date(2019, 1, 31)
+end_date = date(2019, 6, 20)
+date_range = transfer_tools.daterange(start_date, end_date)
+for each_date in date_range:
+    today_date = each_date.strftime("%Y%m%d")  # date
+    col_real_time = db_real_time["R" + today_date]
+    col_real_time.create_index([("stop_id", ASCENDING),("route_id", ASCENDING)])
 
 
 

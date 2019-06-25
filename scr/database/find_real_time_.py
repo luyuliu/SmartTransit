@@ -196,13 +196,22 @@ def paralleling_transfers(single_date):
             recordss["scheduled_time"] = scheduled_time
 
             count += 1
-            if count % 1000 == 1:
+            if count % 10000 == 1:
                 print(today_date, ": ", count/total_count*100)
 
-            col_real_time.insert_one(recordss)
+            insertionList.append(recordss)
+
+            if len(insertionList) == 10000:
+                col_real_time.insert_many(insertionList)
+                insertionList = []
+
+    col_real_time.insert_many(insertionList)
+    insertionList = []
+
     print("-----------------------", "InsertDone:", today_date, "-----------------------")
     end_time = time.time()
     print(end_time-start_time)
+
     col_real_time.create_index([("trip_id", 1), ("stop_id", 1)])
 
 
@@ -215,7 +224,7 @@ if __name__ == '__main__':
         paralleling_transfers(each_date)'''
 
     cores = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(processes=35)
+    pool = multiprocessing.Pool(processes=30)
     date_range = transfer_tools.daterange(start_date, end_date)
     output=[]
     output=pool.map(paralleling_transfers, date_range)
