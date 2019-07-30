@@ -1,5 +1,5 @@
 
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from datetime import timedelta, date
 import datetime
 import multiprocessing
@@ -64,11 +64,16 @@ if __name__ == '__main__':
     start_date = date(2018, 2, 1)
     end_date = date(2019, 1, 31)
 
+    # for memory in range(1, 10):
+    #     date_range = list(transfer_tools.daterange(start_date, end_date - timedelta(days = memory)))
+    #     cores = multiprocessing.cpu_count()
+    #     pool = multiprocessing.Pool(processes=30)
+    #     output = []
+    #     output = pool.starmap(analyze_transfer, zip(date_range,[memory]*len(date_range)))
+    #     pool.close()
+    #     pool.join()
+
     for memory in range(1, 10):
-        date_range = list(transfer_tools.daterange(start_date, end_date - timedelta(days = memory)))
-        cores = multiprocessing.cpu_count()
-        pool = multiprocessing.Pool(processes=30)
-        output = []
-        output = pool.starmap(analyze_transfer, zip(date_range,[memory]*len(date_range)))
-        pool.close()
-        pool.join()
+        for single_date in transfer_tools.daterange(start_date, end_date- timedelta(days = memory)):
+            col_er = db_opt_result["er_min_" + str(memory) + "_" + single_date.strftime("%Y%m%d")]
+            col_er.create_index([("trip_id", ASCENDING), ("stop_id", ASCENDING)])
