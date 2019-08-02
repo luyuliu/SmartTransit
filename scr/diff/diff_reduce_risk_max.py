@@ -154,7 +154,7 @@ def reduce_diff(start_date, end_date):
                     else:
                         dic_stops[stop_id]["wt_pr_opt_"+str(time_walking)] += wt_pr_opt
                         dic_stops[stop_id]["dt_pr_opt_"+str(time_walking)] += dt_pr_opt
-                        if time_alt > time_actual:
+                        if time_alt > time_arr:
                             dic_stops[stop_id]["mc_pr_opt_"+str(time_walking)]+=1
                         dic_stops[stop_id]["buffer_pr_opt_"+str(time_walking)] += single_stop_time["buffer_"+str(time_walking)]
                 

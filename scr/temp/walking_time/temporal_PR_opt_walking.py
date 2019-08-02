@@ -44,8 +44,8 @@ def reduce_diff(start_date, end_date):
         for each_record in rl_opt_result:
             for i in range(10):
                 try:
-                    time_gr_alt = each_record["time_rr_alt_" + str(i)]
-                    time_gr_arr = each_record["time_rr_arr_" + str(i)]
+                    time_gr_alt = each_record["time_alt_" + str(i)]
+                    time_gr_arr = each_record["time_smart_" + str(i)]
                 except:
                     continue
 
