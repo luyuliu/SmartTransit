@@ -6,7 +6,7 @@ from datetime import timedelta, date
 import datetime
 import multiprocessing
 client = MongoClient('mongodb://localhost:27017/')
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(os.path.dirname(os.path.dirname((os.path.abspath(__file__)))))
 import transfer_tools
 
 from itertools import chain
@@ -36,7 +36,7 @@ def reduce_diff(start_date, end_date):
     for single_date in date_range:
 
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff[today_date]
+        col_diff = db_diff["MX" + "_" + today_date]
 
         rl_opt_result = list(
             col_diff.find({}))
@@ -52,17 +52,33 @@ def reduce_diff(start_date, end_date):
             # time_ar_arr = each_record["time_er_arr"]
 
             # nR
-            time_ar_alt = each_record["time_actual"]
-            time_ar_arr = each_record["time_normal"]
-            
+            # time_ar_alt = each_record["time_actual"]
+            # time_ar_arr = each_record["time_normal"]
 
-            if type(time_ar_alt) is int and type(time_ar_arr) is not str and time_ar_alt != 0 and time_ar_arr != 0:
-                wt_ar += time_ar_alt - time_ar_arr
-                wt_ar_count += 1
+            # GR
+            for i in range(10):
+                try:
+                    time_gr_alt = each_record["time_alt_" + str(i)]
+                    time_gr_arr = each_record["time_smart_" + str(i)]
+                except:
+                    continue
+
+                if type(time_gr_alt) is int and type(time_gr_arr) is int and time_gr_alt != 0 and time_gr_arr != 0:
+                    wt_ar += time_gr_alt - time_gr_arr
+                    wt_ar_count += 1
+
+            # if type(time_ar_alt) is int and type(time_ar_arr) is not str and time_ar_alt != 0 and time_ar_arr != 0:
+            #     wt_ar += time_ar_alt - time_ar_arr
+            #     wt_ar_count += 1
+        print(today_date, wt_ar / wt_ar_count )
+
 
     average = wt_ar / wt_ar_count 
+    print("__________-___________")
+    print(average)
 
     wt_ar_var = 0
+    date_range = transfer_tools.daterange(start_date, end_date)
     for single_date in date_range:
 
         today_date = single_date.strftime("%Y%m%d")  # date
@@ -72,15 +88,29 @@ def reduce_diff(start_date, end_date):
             col_diff.find({}))
             
         for each_record in rl_opt_result:
-            time_ar_alt = each_record["time_actual"]
-            time_ar_arr = each_record["time_ar_arr"]
+            # GR
+            for i in range(10):
+                try:
+                    time_gr_alt = each_record["time_alt_" + str(i)]
+                    time_gr_arr = each_record["time_smart_" + str(i)]
+                except:
+                    continue
+
+                if type(time_gr_alt) is int and type(time_gr_arr) is int and time_gr_alt != 0 and time_gr_arr != 0:
+                    wt_ar_var += ((time_gr_alt - time_gr_arr) - average)**2
+
+            # time_ar_alt = each_record["time_actual"] 
+            # time_ar_arr = each_record["time_ar_arr"]
+            # time_ar_alt = each_record["time_actual"]
+            # time_ar_arr = each_record["time_normal"]
             # print(time_ar_arr)
 
-            if type(time_ar_alt) is int and type(time_ar_arr) is not str and time_ar_alt != 0 and time_ar_arr != 0:
-                wt_ar_var += ((time_ar_alt - time_ar_arr) - average)**2
-        
+            # if type(time_ar_alt) is int and type(time_ar_arr) is not str and time_ar_alt != 0 and time_ar_arr != 0:
+            #     wt_ar_var += ((time_ar_alt - time_ar_arr) - average)**2
+        print(today_date)
+
     if wt_ar_count != 0:
-        print(today_date, (wt_ar_var/wt_ar_count)**(1/2))
+        print("Final: ", (wt_ar_var/wt_ar_count)**(1/2))
     else:
         print(0)
 

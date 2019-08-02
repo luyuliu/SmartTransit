@@ -33,7 +33,7 @@ def reduce_diff(start_date, end_date):
     for single_date in date_range:
 
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff[today_date]
+        col_diff = db_diff["MX" + "_" + today_date]
 
         rl_opt_result = list(
             col_diff.find({}))
@@ -49,7 +49,7 @@ def reduce_diff(start_date, end_date):
                 except:
                     continue
 
-                if type(time_gr_alt) is int and type(time_gr_arr) is int and time_gr_alt != 0 and time_gr_arr != 0:
+                if type(time_gr_alt) is int and type(time_gr_arr) is int and time_gr_alt != 0 and time_gr_arr != 0 time_gr_alt != 9999999999 and  time_gr_alt != 9999999999:
                     wt_gr[i] += time_gr_alt - time_gr_arr
                     wt_gr_count[i] += 1
 
