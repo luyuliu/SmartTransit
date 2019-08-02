@@ -31,12 +31,23 @@ def validate_er(single_date, memory):
 
     today_date = single_date.strftime("%Y%m%d")  # date
     today_seconds = time.mktime(time.strptime(today_date, "%Y%m%d"))
-    print(today_date + " - " + str(memory) + " - Start.")
     col_real_time = db_real_time["R" + today_date]
     rl_real_time = list(col_real_time.find({}))
     col_er_val = db_er_val["er_min_" + str(memory) + "_" + today_date]
     total_count = len(rl_real_time)
     count = 0
+    print(today_date + " - " + str(memory) + " - Start.")
+
+    pre_count = col_er_val.estimated_document_count()
+    if pre_count==total_count:
+        print(today_date + " - " + str(memory) + " - Skip.")
+        return False
+    else:
+        if pre_count!= 0:
+            col_er_val.drop()
+            print(today_date + " - " + str(memory) + " - Drop.")
+        else:
+            print(today_date + " - " + str(memory) + " - Start.")
 
     recordss = []
     for each_record in rl_real_time:
@@ -53,6 +64,7 @@ def validate_er(single_date, memory):
         each_record["time_er_trip_id"] = alt_cal_rl[1]
         each_record["time_er_trip_sequence"] = alt_cal_rl[2]
         each_record.pop("_id", None)
+        recordss.append(each_record)
 
         if len(recordss) == 10000:
             col_er_val.insert_many(recordss)
@@ -60,8 +72,10 @@ def validate_er(single_date, memory):
             print(today_date + " - " + str(memory) + " - Insert: " + str(int(count/total_count*10000)/100))
 
         count += 1
-    col_er_val.insert_many(recordss)
-    recordss = []
+    
+    if len(recordss)!= 0:
+        col_er_val.insert_many(recordss)
+        recordss = []
 
     print(today_date + " - " + str(memory) + " - Done.")
 
