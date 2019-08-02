@@ -25,7 +25,8 @@ db_diff_reduce = client.cota_diff_reduce
 walking_time_limit = 10  # min
 criteria = 5  # seconds
 designated_route_id = 2
-
+db_er_val = client.cota_er_validation
+memory = 6
 
 def reduce_diff(start_date, end_date):
     date_range = transfer_tools.daterange(start_date, end_date)
@@ -34,11 +35,12 @@ def reduce_diff(start_date, end_date):
     wt_er_count = [0] *7
     for single_date in date_range:
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff["MX" + "_" + today_date]
+        col_er_val = db_er_val["er_min_" + str(memory) + "_" + today_date]
         today_weekday = single_date.weekday()
 
         rl_opt_result = list(
-            col_diff.find({}))
+            col_er_val.find((
+        {"$or": [{"route_id": 2}, {"route_id": -2}]})))
             
 
         for each_record in rl_opt_result:

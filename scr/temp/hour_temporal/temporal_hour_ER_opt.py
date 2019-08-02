@@ -26,7 +26,9 @@ db_diff_reduce = client.cota_diff_reduce
 walking_time_limit = 10  # min
 criteria = 5  # seconds
 designated_route_id = 2
+db_er_val = client.cota_er_validation
 
+memory = 6
 
 def reduce_diff(start_date, end_date):
     date_range = transfer_tools.daterange(start_date, end_date)
@@ -36,11 +38,12 @@ def reduce_diff(start_date, end_date):
     for single_date in date_range:
 
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff["MX" + "_" + today_date]
         today_seconds = time.mktime(time.strptime(today_date, "%Y%m%d"))
+        col_er_val = db_er_val["er_min_" + str(memory) + "_" + today_date]
 
         rl_opt_result = list(
-            col_diff.find({}))
+            col_er_val.find((
+        {"$or": [{"route_id": 2}, {"route_id": -2}]})))
             
         # for each_record in rl_opt_result:
         #     # time_alt = each_record["time_actual"] # ar
@@ -70,8 +73,8 @@ def reduce_diff(start_date, end_date):
                     # time_alt = each_record["time_alt_" + str(i)]
                     # time_arr = each_record["time_smart_" + str(i)]
 
-                    time_alt = each_record["time_rr_alt_" + str(i)]
-                    time_arr = each_record["time_rr_arr_" + str(i)]
+                    time_alt = each_record["time_er_alt_" + str(i)]
+                    time_arr = each_record["time_er_arr_" + str(i)]
                     diff_seconds = int((time_alt - today_seconds)/3600)
                     if diff_seconds>23:
                         diff_seconds = 23
