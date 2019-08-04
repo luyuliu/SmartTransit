@@ -48,11 +48,18 @@ First, we would like to optimize PR's waiting time over IB (insurance buffer).
 ### 2. Cross-compare different TPSs' waiting time difference
 There are several TPSs to be compared: 
 
-First TPS  | Second TPS
+TPS  | RTI support? | Database location (daily, final version)
+------------- | ------------- | ------------- 
+PR family  | yes | cota_pr_optimization/today_date + "_" + buffer
+PR optimal  | yes | cota_pr_optimization_result/today_date + "_reval_max"
+GR (formerly known as RR)  | yes | cota_pr_optimization/today_date + "_" + 0
 ------------- | -------------
-PR optimal  | ER
-GR (formerly known as RR)  | NR
-Static PR    | AR
+ER family  | no | cota_er_validation/ "er_min_" + memory + "_" + today_date
+ER optimal  | no | cota_er_validation/ "er_min_" + 6 + "_" + today_date
+AR  | no | cota_ar
+NR  | no | everywhere
+
+
 ### 3. Visualization of waiting time, waiting time difference, and IBs
 
 
