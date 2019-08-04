@@ -62,6 +62,58 @@ NR  | no | everywhere
 
 ### 3. Visualization of waiting time, waiting time difference, and IBs
 
+## Database explanation ##
+### GTFS ###
+**cota_gtfs:**
+* Arranged as collection_name + "_" + timestamp
+* All standard GTFS files
+* A supplemented collection of trip_seq collection.
+
+### Real-time ###
+* Real-time database of every day
+* Joint with other GTFS database for query purposes. stop, trip, stop_time
+* collection name: "R" + today_date
+* trip_sequence: the trip's sequence at the stop in the trip sequence array
+* stop_sequence: the stop's sequence within this trip
+* seq: the sequential number in the GTFS real-time trip update feed. It is the order number of the target stop in the closest feed. The smaller the number is, the more accruate the time should be.
+
+### PR ###
+**cota_pr_optimization:**
+* Each collection is a buffer's daily performance, for PR optimization - calculation.
+
+**cota_pr_optimization_result:**
+* Each collection of (today_date + "_opt_risk_averse"): for PR optimization - optimize.
+time_smart: user's arrival time at the stop<br />
+time_alt: bus's departure time from the stop<br />
+time_actual: bus's actual departure time<br />
+time_normal: bus's schedule time & NR users' arrival time at the stop<br />
+
+* pr_opt_ibs_risk_averse: for PR optimization - finalize.
+* Each collection of (today_date + "_reval_max"): for PR optimization - revalidate.
+
+### AR ###
+**cota_ar: <br />**
+* There's no "schedule" for AR.
+* Each today_date collection: AR validation
+
+### GR ###
+** Directly use PR optimization's collection **
+Find the collection at cota_pr_optimization/today_date + "_" + 0
+
+### ER ###
+** cota_er_optimization **
+Contain the "schedule" for each day and each memory peroid.
+
+** cota_er_validation **
+The results of the ER validation for each schedule. 
+
+### Result ###
+**The final result should be visualized thru a web interface or output from console.**
+** cota_diff **
+Join all TPSs' validation result into a single collection for a day.
+** cota_diff_reduce **
+Reduce every day's data into one collection.
+
 
 ## Code sequence/dependence
 ### 1. PR optimization ###
