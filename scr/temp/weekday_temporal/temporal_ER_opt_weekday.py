@@ -37,6 +37,7 @@ def reduce_diff(start_date, end_date):
         today_date = single_date.strftime("%Y%m%d")  # date
         col_er_val = db_er_val["er_min_" + str(memory) + "_" + today_date]
         today_weekday = single_date.weekday()
+        print(today_weekday)
 
         rl_opt_result = list(
             col_er_val.find((
@@ -54,7 +55,7 @@ def reduce_diff(start_date, end_date):
         print(today_date, wt_er[0], wt_er[1],wt_er[2],wt_er[3],wt_er[4],wt_er[5],wt_er[6])
         
     for today_weekday in range(7):
-        if wt_er_count[0] != 0:
+        if wt_er_count[today_weekday] != 0:
             wt_er[today_weekday] = (wt_er[today_weekday]/wt_er_count[today_weekday])
 
     print(today_date, wt_er[0], wt_er[1],wt_er[2],wt_er[3],wt_er[4],wt_er[5],wt_er[6])

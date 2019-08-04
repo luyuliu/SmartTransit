@@ -42,48 +42,49 @@ def reduce_diff(start_date, end_date):
         col_er_val = db_er_val["er_min_" + str(memory) + "_" + today_date]
 
         rl_opt_result = list(
-            col_er_val.find((
-        {"$or": [{"route_id": 2}, {"route_id": -2}]})))
+            col_er_val.find(
+        {"$or": [{"route_id": 2}, {"route_id": -2}]}))
+
             
-        # for each_record in rl_opt_result:
-        #     # time_alt = each_record["time_actual"] # ar
-        #     # time_arr = each_record["time_ar_arr"]
-
-        #     # time_alt = each_record["time_actual"] # nr
-        #     # time_arr = each_record["time_normal"]
-
-        #     # time_alt = each_record["time_er_alt"] # er
-        #     # time_arr = each_record["time_er_arr"]
-            
-        #     time_alt = each_record["time_er_alt"] # er
-        #     time_arr = each_record["time_er_arr"]
-
-        #     if type(time_alt) is int and type(time_arr) is not str and time_alt != 0 and time_arr != 0:
-        #         diff_seconds = int((time_alt - today_seconds)/3600)
-        #         if diff_seconds>23:
-        #             diff_seconds = 23
-                
-        #         # print(diff_seconds)
-        #         wt_list[diff_seconds] += time_alt - time_arr
-        #         wt_list_count[diff_seconds] += 1
-
         for each_record in rl_opt_result:
-            for i in range(10):
-                try:
-                    # time_alt = each_record["time_alt_" + str(i)]
-                    # time_arr = each_record["time_smart_" + str(i)]
+            # time_alt = each_record["time_actual"] # ar
+            # time_arr = each_record["time_ar_arr"]
 
-                    time_alt = each_record["time_er_alt_" + str(i)]
-                    time_arr = each_record["time_er_arr_" + str(i)]
-                    diff_seconds = int((time_alt - today_seconds)/3600)
-                    if diff_seconds>23:
-                        diff_seconds = 23
-                except:
-                    continue
+            # time_alt = each_record["time_actual"] # nr
+            # time_arr = each_record["time_normal"]
 
-                if type(time_alt) is int and type(time_arr) is int and time_alt != 0 and time_arr != 0:
-                    wt_list[diff_seconds] += time_alt - time_arr
-                    wt_list_count[diff_seconds] += 1
+            # time_alt = each_record["time_er_alt"] # er
+            # time_arr = each_record["time_er_arr"]
+            
+            time_alt = each_record["time_er_alt"] # er
+            time_arr = each_record["time_er_arr"]
+
+            if type(time_alt) is int and type(time_arr) is not str and time_alt != 0 and time_arr != 0:
+                diff_seconds = int((time_alt - today_seconds)/3600)
+                if diff_seconds>23:
+                    diff_seconds = 23
+                
+                # print(diff_seconds)
+                wt_list[diff_seconds] += time_alt - time_arr
+                wt_list_count[diff_seconds] += 1
+
+        # for each_record in rl_opt_result:
+        #     for i in range(10):
+        #         try:
+        #             # time_alt = each_record["time_alt_" + str(i)]
+        #             # time_arr = each_record["time_smart_" + str(i)]
+
+        #             time_alt = each_record["time_er_alt_" + str(i)]
+        #             time_arr = each_record["time_er_arr_" + str(i)]
+        #             diff_seconds = int((time_alt - today_seconds)/3600)
+        #             if diff_seconds>23:
+        #                 diff_seconds = 23
+        #         except:
+        #             continue
+
+        #         if type(time_alt) is int and type(time_arr) is int and time_alt != 0 and time_arr != 0:
+        #             wt_list[diff_seconds] += time_alt - time_arr
+        #             wt_list_count[diff_seconds] += 1
         
         print(today_date,end =" ")
         for i in range (24):

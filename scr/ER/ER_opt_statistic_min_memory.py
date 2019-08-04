@@ -24,7 +24,7 @@ def analyze_transfer(start_date, end_date, memory):
     for single_date in transfer_tools.daterange(start_date, end_date):
         today_date = single_date.strftime("%Y%m%d")  # date
         col_er_val = db_er_val["er_min_" + str(memory) + "_" + today_date]
-        rl_opt_result = list(col_er_val.find({}))
+        rl_opt_result = list(col_er_val.find({"$or": [{"route_id": 2}, {"route_id": -2}]}))
         for each_record in rl_opt_result:
             time_er_alt = each_record["time_er_alt"]
             time_er_arr = each_record["time_er_arr"]
