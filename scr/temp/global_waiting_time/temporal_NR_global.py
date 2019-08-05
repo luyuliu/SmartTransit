@@ -42,8 +42,8 @@ def reduce_diff(start_date, end_date):
             
 
         for each_record in rl_opt_result:
-            time_nr_alt = each_record["time_actual"]
-            time_nr_arr = each_record["time_normal"]
+            time_nr_alt = each_record["time_nr_alt"]
+            time_nr_arr = each_record["time_nr_arr"]
 
             if type(time_nr_alt) is int and type(time_nr_arr) is int and time_nr_alt != 0 and time_nr_arr != 0:
                 wt_nr += time_nr_alt - time_nr_arr

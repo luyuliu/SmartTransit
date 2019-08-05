@@ -46,8 +46,8 @@ def reduce_diff(start_date, end_date):
             # time_alt = each_record["time_actual"] # ar
             # time_arr = each_record["time_ar_arr"]
 
-            time_alt = each_record["time_actual"] # nr
-            time_arr = each_record["time_normal"]
+            time_alt = each_record["time_nr_alt"] # nr
+            time_arr = each_record["time_nr_arr"]
 
             # time_alt = each_record["time_er_alt"] # er
             # time_arr = each_record["time_er_arr"]
