@@ -29,8 +29,6 @@ def reduce_diff(start_date, end_date):
 
     dic_stops = {}
     for single_date in date_range:
-        else:
-            summer_time = 1
         today_date = single_date.strftime("%Y%m%d")  # date
         col_diff = db_diff["MX_" + today_date]
 
@@ -81,6 +79,7 @@ def reduce_diff(start_date, end_date):
                 line["wt_nr"] = 0
 
                 line["mc_er"] = 0 # Miss count.
+                line["mc_nr"] = 0
 
                 line["dt_er"] = 0
 
@@ -116,6 +115,8 @@ def reduce_diff(start_date, end_date):
             # NR
             try:
                 wt_nr = single_stop_time["time_nr_alt"] - single_stop_time["time_nr_arr"]
+                if single_stop_time["time_nr_alt"]>time_actual:
+                    dic_stops[stop_id]["mc_nr"] += 1
             except:
                 pass
             else:
