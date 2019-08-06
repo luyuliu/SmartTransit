@@ -40,11 +40,11 @@ def reduce_diff(start_date, end_date):
         for each_record in rl_diff:
             for i in range(10):
                 time_gr_alt = (each_record["time_alt_" + str(i)])
-                time_gr_arr = (each_record["time_smart_" + str(i)])
-                if time_gr_alt == 0 or time_gr_arr == 0:
+                time_gr_act = (each_record["time_actual"])
+                if time_gr_alt == 0 or time_gr_act == 0:
                     continue
                 try:
-                    if time_gr_alt < time_gr_arr:
+                    if time_gr_alt > time_gr_act:
                         wt_risk_count [i] += 1
                 except:
                     continue

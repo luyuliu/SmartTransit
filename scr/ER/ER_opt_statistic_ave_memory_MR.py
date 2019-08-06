@@ -71,4 +71,4 @@ if __name__ == '__main__':
     # pool.join()
 
     # print("The answer is: ", output)
-    analyze_transfer(1)
+    analyze_transfer(6)

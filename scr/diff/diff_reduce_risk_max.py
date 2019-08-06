@@ -22,15 +22,13 @@ db_diff_reduce = client.cota_diff_reduce
 
 walking_time_limit = 10 # min
 criteria = 5 # seconds
-designated_route_id = 2
+designated_route_id = -2
 
 def reduce_diff(start_date, end_date):
     date_range =transfer_tools.daterange(start_date, end_date)
 
     dic_stops = {}
     for single_date in date_range:
-        if (single_date - date(2018, 3, 10)).total_seconds() <= 0 or (single_date - date(2018, 11, 3)).total_seconds() > 0:
-            summer_time = 0
         else:
             summer_time = 1
         today_date = single_date.strftime("%Y%m%d")  # date
@@ -46,7 +44,6 @@ def reduce_diff(start_date, end_date):
 
         for single_stop_time in rl_diff:
             error_tag = False
-            special_error_tag = False
             count = count + 1
             trip_id = single_stop_time["trip_id"]  # emurate rs_all_trips
             stop_id = single_stop_time["stop_id"]
@@ -118,7 +115,7 @@ def reduce_diff(start_date, end_date):
 
             # NR
             try:
-                wt_nr = time_actual - time_normal
+                wt_nr = single_stop_time["time_nr_alt"] - single_stop_time["time_nr_arr"]
             except:
                 pass
             else:
@@ -154,7 +151,7 @@ def reduce_diff(start_date, end_date):
                     else:
                         dic_stops[stop_id]["wt_pr_opt_"+str(time_walking)] += wt_pr_opt
                         dic_stops[stop_id]["dt_pr_opt_"+str(time_walking)] += dt_pr_opt
-                        if time_alt > time_arr:
+                        if time_alt > time_actual:
                             dic_stops[stop_id]["mc_pr_opt_"+str(time_walking)]+=1
                         dic_stops[stop_id]["buffer_pr_opt_"+str(time_walking)] += single_stop_time["buffer_"+str(time_walking)]
                 
@@ -208,7 +205,7 @@ def reduce_diff(start_date, end_date):
 
 if __name__ == "__main__":
     start_date = date(2018, 2, 1)
-    end_date = date(2019, 1, 30)
+    end_date = date(2019, 1, 31)
     reduce_diff(start_date, end_date)
 
     # Todo: find skip reason

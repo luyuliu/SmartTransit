@@ -61,7 +61,7 @@ def reduce_diff(start_date, end_date):
             for i in range(10):
                 try:
                     time_gr_alt = each_record["time_alt_" + str(i)]
-                    time_gr_arr = each_record["time_smart_" + str(i)]
+                    time_gr_arr = each_record["time_actual"]
 
                     
                     # GR
@@ -71,7 +71,7 @@ def reduce_diff(start_date, end_date):
                     continue
 
                 if type(time_gr_alt) is int and type(time_gr_arr) is not str and time_gr_alt != 0 and time_gr_arr != 0:
-                    if time_gr_alt - time_gr_arr<0:
+                    if time_gr_alt - time_gr_arr>0:
                         wt_ar += 1
                     wt_ar_count += 1
 

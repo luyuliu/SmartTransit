@@ -52,33 +52,33 @@ def reduce_diff(start_date, end_date):
             # time_ar_arr = each_record["time_er_arr"]
 
             # nR
-            # time_ar_alt = each_record["time_actual"]
-            # time_ar_arr = each_record["time_normal"]
+            time_ar_alt = each_record["time_nr_alt"]
+            time_ar_arr = each_record["time_actual"]
 
             # GR
 
             # PR
-            for i in range(10):
-                try:
-                    time_gr_alt = each_record["time_alt_" + str(i)]
-                    time_gr_arr = each_record["time_smart_" + str(i)]
+            # for i in range(10):
+            #     try:
+            #         # time_gr_alt = each_record["time_alt_" + str(i)]
+            #         # time_gr_arr = each_record["time_smart_" + str(i)]
 
                     
-                    # GR
-                    # time_gr_alt = each_record["time_rr_alt_" + str(i)]
-                    # time_gr_arr = each_record["time_rr_arr_" + str(i)]
-                except:
-                    continue
+            #         # GR
+            #         time_gr_alt = each_record["time_rr_alt_" + str(i)]
+            #         time_gr_arr = each_record["time_actual"]
+            #     except:
+            #         continue
 
-                if type(time_gr_alt) is int and type(time_gr_arr) is not str and time_gr_alt != 0 and time_gr_arr != 0:
-                    if time_gr_alt - time_gr_arr<0:
-                        wt_ar += 1
-                    wt_ar_count += 1
+            #     if type(time_gr_alt) is int and type(time_gr_arr) is not str and time_gr_alt != 0 and time_gr_arr != 0:
+            #         if time_gr_alt - time_gr_arr>0:
+            #             wt_ar += 1
+            #         wt_ar_count += 1
 
-            # if type(time_ar_alt) is int and type(time_ar_arr) is not str and time_ar_alt != 0 and time_ar_arr != 0:
-            #     if time_ar_alt - time_ar_arr<0:
-            #         wt_ar += 1
-            #     wt_ar_count += 1
+            if type(time_ar_alt) is int and type(time_ar_arr) is not str and time_ar_alt != 0 and time_ar_arr != 0:
+                if time_ar_alt - time_ar_arr>0:
+                    wt_ar += 1
+                wt_ar_count += 1
         print(today_date, wt_ar / wt_ar_count*100 )
 
 
@@ -91,7 +91,7 @@ def reduce_diff(start_date, end_date):
     for single_date in date_range:
 
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff[today_date]
+        col_diff = db_diff["MX_" + today_date]
 
         rl_opt_result = list(
             col_diff.find({}))
