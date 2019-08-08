@@ -43,6 +43,8 @@ def convert_to_timestamp(time_string, single_date):
     minutes = int(theTime[1])
     seconds = int(theTime[2])
     total_second = hours * 3600 + minutes * 60 + seconds
+    if single_date ==None:
+        return total_second
 
     today_date = single_date.strftime("%Y%m%d")  # date
         

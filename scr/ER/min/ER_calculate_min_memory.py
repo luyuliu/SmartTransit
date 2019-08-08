@@ -16,6 +16,7 @@ db_GTFS = client.cota_gtfs
 db_real_time = client.cota_real_time
 db_trip_update = client.trip_update
 db_opt_result = client.cota_er_optimization
+db_new_trips = client.cota_gtfs_new_trips
 
 def analyze_transfer(start_date_p, memory):
     print(start_date_p.strftime("%Y%m%d") + " - Start.")
@@ -25,12 +26,14 @@ def analyze_transfer(start_date_p, memory):
     for single_date in transfer_tools.daterange(start_date_p, end_date_p):
         today_date = single_date.strftime("%Y%m%d")  # date
         today_seconds = time.mktime(time.strptime(today_date, "%Y%m%d"))
+        
 
         col_real_time = db_real_time["R"+today_date]
         result_real_time = list(col_real_time.find({}))
         for each_record in result_real_time:
             trip_id = each_record["trip_id"]
             stop_id = each_record["stop_id"]
+
 
             try:
                 records_dic[trip_id]
