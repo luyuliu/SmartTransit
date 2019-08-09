@@ -30,7 +30,9 @@ start_date = date(2018, 1, 29)
 def calculate_parameters(end_date_p):
     
     records_dic={} # Avoid IO. But could be bad for small memory.
-    col_opt_fin = db_opt_fin["ALL_" + end_date_p.strftime("%Y%m%d") ]
+    col_opt_fin = db_opt_fin["SEP_" + end_date_p.strftime("%Y%m%d") ]
+    if (end_date_p - date (2018, 9, 3)).total_seconds()>=0:
+        start_date = date(2018, 9, 2)
 
     for single_date in transfer_tools.daterange(start_date, end_date_p):
         today_date = single_date.strftime("%Y%m%d")  # date

@@ -39,7 +39,7 @@ def reduce_diff(start_date, end_date):
     downstream_count = 0
     for single_date in date_range:
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff["MX" + "_" + today_date]
+        col_diff = db_diff["SEP" + "_" + today_date]
         col_real_time = db_real_time["R" + today_date]
 
         rl_opt_result = list(

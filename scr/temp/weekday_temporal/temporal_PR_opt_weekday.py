@@ -35,7 +35,7 @@ def reduce_diff(start_date, end_date):
     for single_date in date_range:
 
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff["MX" + "_" + today_date]
+        col_diff = db_diff["SEP" + "_" + today_date]
         today_weekday = single_date.weekday()
         rl_opt_result = list(
             col_diff.find({}))

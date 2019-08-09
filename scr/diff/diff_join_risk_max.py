@@ -15,6 +15,7 @@ db_real_time = client.cota_real_time
 db_trip_update = client.trip_update
 db_smart_transit = client.cota_pr_optimization
 db_opt_result = client.cota_pr_optimization_result
+db_pr_val = client.cota_pr_validation
 db_ar = client.cota_ar
 db_er = client.cota_er
 

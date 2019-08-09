@@ -26,7 +26,7 @@ def analyze_transfer(memory):
     for single_date in transfer_tools.daterange(start_date, end_date):
         today_date = single_date.strftime("%Y%m%d")  # date
 
-        col_pr_val = db_pr_val["ALL_" + (single_date).strftime("%Y%m%d")]
+        col_pr_val = db_pr_val["SEP_" + (single_date).strftime("%Y%m%d")]
         rl_opt_result = list(col_pr_val.find({}))
         for each_record in rl_opt_result:
             for i in range(10):
@@ -50,7 +50,7 @@ def analyze_transfer(memory):
     wt_pr_val = 0
     for single_date in transfer_tools.daterange(start_date, end_date):
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_pr_val = db_pr_val["ALL_" + today_date]
+        col_pr_val = db_pr_val["SEP_" + today_date]
         rl_opt_result = list(col_pr_val.find({}))
         for each_record in rl_opt_result:
             for i in range(10):

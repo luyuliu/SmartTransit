@@ -25,7 +25,7 @@ def analyze_transfer(single_date):
     today_weekday = single_date.weekday()  # day of week
     
     that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
-    col_diff = db_diff["MX_" + today_date]
+    col_diff = db_diff["SEP_" + today_date]
     rl_diff = list(col_diff.find({}))
     count = 0
 
@@ -43,14 +43,14 @@ def analyze_transfer(single_date):
 
 if __name__ == '__main__':
     # analyze_transfer(date(2018, 2, 1))
-    start_date = date(2018, 2, 3)
-    end_date = date(2019, 1, 30)
+    start_date = date(2018, 2, 1)
+    end_date = date(2018, 2, 3)
 
     # for single_date in transfer_tools.daterange(start_date, end_date):
     #     analyze_transfer(single_date)
 
     cores = int(multiprocessing.cpu_count()/4*3)
-    pool = multiprocessing.Pool(processes= 8)
+    pool = multiprocessing.Pool(processes= 30)
     date_range = transfer_tools.daterange(start_date, end_date)
     output = []
     output = pool.map(analyze_transfer, date_range)

@@ -35,8 +35,8 @@ def validate_stop_time(single_date):
     else:
         service_id = 3
         
-    col_opt_result = db_opt_finalization["ALL_" + today_date]
-    col_smart_transit = db_opt_result["ALL_" + today_date]
+    col_opt_result = db_opt_finalization["SEP_" + today_date]
+    col_smart_transit = db_opt_result["SEP_" + today_date]
     that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
 
     col_real_time = db_real_time["R"+today_date]
