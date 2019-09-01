@@ -204,29 +204,42 @@ $("#start-btn").click(function () {
 });
 
 
-// $("#start-opt-btn").click(function () {
-//   var todayDate = $("#date-pr-input").val().replace('-', '').replace('-', '')
-//   console.log(todayDate)
-//   var routeID = $("#route-pr-input").val()
-//   var variableCode = $("#variable-pr-input").val()
-//   var queryURL = "http://127.0.0.1:50032/" + todayDate + '_route_reduced?where={"route_id":' + routeID + '}'
-//   console.log(queryURL)
+$("#start-4-btn").click(function () {
+  var todayDate = $("#date-4-input").val().replace('-', '').replace('-', '')
+  console.log(todayDate)
+  var tripID = $("#trip-4-input").val()
+  var queryURL = "http://127.0.0.1:8080/-2_delay_reclamation"
+  console.log(queryURL)
 
-//   $.ajax({
-//     url: queryURL,
-//     type: "GET",
-//     beforeSend: function (xhr) {
-//       xhr.setRequestHeader('Content-Type', 'application/json');
-//       xhr.setRequestHeader('X-Content-Type-Options', 'nosniff');
-//     },
-//     success: function (rawstops) {
-//       var stops = rawstops._items
-//       console.log(stops)
-//       visualization(stops, variableCode);
-//     }
-//   });
+  $.ajax({
+    url: queryURL,
+    type: "GET",
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-Content-Type-Options', 'nosniff');
+    },
+    success: function (rawstops) {
+      var stops = rawstops._items
+      console.log(stops)
+      var colorARamp = [0, 5, 8, 10, 12, 15, 25, Infinity] // red is waiting more time; blue is saving more time
+      var colorACode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
+      
+      for (var i = 0; i<stops.length; i++){
+        diff_time = stops[i].delay_reclamation_count/stops[i].total_count*100
 
-// });
+        L.circle([parseFloat(stops[i].stop_lat), parseFloat(stops[i].stop_lon)], {
+          radius: 100,
+          stroke: true,
+          weight: 0.2,
+          color: "#000000",
+          fillOpacity: 1,
+          fillColor: returnColor(diff_time, colorARamp, colorACode)
+        }).addTo(map);
+      }
+    }
+  });
+
+});
 
 $("#start-3-btn").click(function () {
   var routeID = $("#route-3-input").val()
@@ -266,6 +279,9 @@ function visualizationReduce(stops, variableCode) {
   // var colorRamp = [0, 250, 300, 350, 400, 500, 600, Infinity] // er and pr_opt diff
 
   // var colorRamp = [0, 100, 200, 300, 400, 500, 600, Infinity] // ar and er and nr
+
+  
+  var colorRamp = [0, 10, 25, 40, 50, 60, 75, 100] // rr miss rate
   
 
   var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
