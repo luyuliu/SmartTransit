@@ -158,7 +158,7 @@ $("#start-btn").click(function () {
         cir.on("mouseover", function (d) {
           var popup = L.popup()
             .setLatLng([parseFloat(d.target.options.info.lat), parseFloat(d.target.options.info.lon)])
-            .setContent("<span>Stop sequence: " + d.target.options.info["stop_sequence"] + "</span></br><span>Delay: " + (d.target.options.info["time"] - d.target.options.info["scheduled_time"] ) + "s</span>")
+            .setContent("<span>Stop sequence: " + d.target.options.info["stop_sequence"] + "</span></br><span>Delay: " + (d.target.options.info["time"] - d.target.options.info["scheduled_time"]) + "s</span>")
             .openOn(map);
           console.log(d.target.options.info["stop_sequence"])
         })
@@ -221,21 +221,54 @@ $("#start-4-btn").click(function () {
     success: function (rawstops) {
       var stops = rawstops._items
       console.log(stops)
-      var colorARamp = [0, 5, 8, 10, 12, 15, 25, Infinity] // red is waiting more time; blue is saving more time
-      var colorACode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
-      
-      for (var i = 0; i<stops.length; i++){
-        diff_time = stops[i].delay_reclamation_count/stops[i].total_count*100
+      var colorRamp = [0, 5, 8, 10, 12, 15, 25, Infinity] // red is waiting more time; blue is saving more time
+      var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
+
+      for (var i = 0; i < stops.length; i++) {
+        diff_time = stops[i].delay_reclamation_count / stops[i].total_count * 100
 
         L.circle([parseFloat(stops[i].stop_lat), parseFloat(stops[i].stop_lon)], {
-          radius: 100,
+          radius: 200,
           stroke: true,
           weight: 0.2,
           color: "#000000",
           fillOpacity: 1,
-          fillColor: returnColor(diff_time, colorARamp, colorACode)
+          fillColor: returnColor(diff_time, colorRamp, colorCode)
         }).addTo(map);
       }
+
+      var title = "Delay relacamation rate (%)"
+      var legend = L.control({ position: "bottomright" });
+      legend.onAdd = function (map) {
+        var div = L.DomUtil.create("div", "info legend");
+        div.id = 'legend'
+
+        var legendContent2 = "<span style='font-size:30;'>Legend</span>"
+        legendContent2 += "<h3>" + title + "</h3>"
+        legendContent2 += '<table><tbody>'
+        for (var i = 0; i < colorCode.length; i++) {
+          console.log(i)
+          if (colorRamp[i] == -Infinity) {
+            labelContent2 = "( -∞, " + colorRamp[i + 1] + ")";
+          }
+          else {
+            if (colorRamp[i + 1] == Infinity) {
+              labelContent2 = "[" + colorRamp[i] + ", ∞ )";
+            }
+            else {
+              labelContent2 = "[" + colorRamp[i] + ", " + colorRamp[i + 1] + ")";
+            }
+          }
+          legendContent2 += "<tr valign='middle'>" +
+            "<td class='tablehead' align='middle'>" + getColorBlockString(colorCode[i]) + "</td>" +
+            "<td class='tablecontent' align='right' style='width:180px;'><span style='width:90%;font-size:30;font:'>" + labelContent2 + "</span><td>" + "</tr>";
+        }
+        legendContent2 += "</tbody><table>";
+
+        div.innerHTML = legendContent2;
+        return div;
+      }
+      legend.addTo(map);
     }
   });
 
@@ -280,9 +313,9 @@ function visualizationReduce(stops, variableCode) {
 
   // var colorRamp = [0, 100, 200, 300, 400, 500, 600, Infinity] // ar and er and nr
 
-  
+
   var colorRamp = [0, 10, 25, 40, 50, 60, 75, 100] // rr miss rate
-  
+
 
   var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
 
@@ -306,7 +339,7 @@ function visualizationReduce(stops, variableCode) {
         // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt, RR difference
-        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate
+        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"] * 100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i][variableCode] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate for static
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
         // fillColor: returnColor((stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
@@ -316,8 +349,8 @@ function visualizationReduce(stops, variableCode) {
       });
       cir.on("click", function (d) {
         // console.log(d.target.options.info["delay"] / d.target.options.info["count"])
-        
-        console.log(d.target.options.stop_id,d.target.options.stop_sequence, d.target.options.j, d.target.options.value, d.target.options.miss_rate)
+
+        console.log(d.target.options.stop_id, d.target.options.stop_sequence, d.target.options.j, d.target.options.value, d.target.options.miss_rate)
       })
 
       cir.addTo(map);
