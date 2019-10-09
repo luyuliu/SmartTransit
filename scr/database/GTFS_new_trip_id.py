@@ -1,3 +1,5 @@
+# This file is for the aggregation of trips across different GTFS files.
+
 import pymongo
 from datetime import timedelta, date
 import time

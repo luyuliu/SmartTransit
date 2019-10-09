@@ -10,34 +10,36 @@ import transfer_tools
 client = MongoClient('mongodb://localhost:27017/')
 
 ###################### GTFS static indexes ######################
-for each_time_stamp in transfer_tools.db_time_stamps:
-    db_stops=transfer_tools.db_GTFS[str(each_time_stamp)+"_stops"]
-    db_stop_times=transfer_tools.db_GTFS[str(each_time_stamp)+"_stop_times"]
-    db_trips=transfer_tools.db_GTFS[str(each_time_stamp)+"_trips"]
-    db_seq = transfer_tools.db_GTFS[str(each_time_stamp) + "_trip_seq"]
+# for each_time_stamp in transfer_tools.db_time_stamps:
+    # db_stops=transfer_tools.db_GTFS[str(each_time_stamp)+"_stops"]
+    # db_stop_times=transfer_tools.db_GTFS[str(each_time_stamp)+"_stop_times"]
+    # db_trips=transfer_tools.db_GTFS[str(each_time_stamp)+"_trips"]
+    # db_seq = transfer_tools.db_GTFS[str(each_time_stamp) + "_trip_seq"]
 
-    db_stop_times.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
-    db_seq.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
-    db_seq.create_index([("service_id", ASCENDING),("seq", ASCENDING),("route_id", ASCENDING),("stop_id", ASCENDING)])
-    db_stops.create_index([("stop_id", ASCENDING)])
-    db_trips.create_index([("service_id", ASCENDING), ("trip_id", ASCENDING)])
-    db_trips.create_index([("service_id", ASCENDING), ("route_id", ASCENDING)])
-    db_trips.create_index([("trip_id", ASCENDING)])
+    # db_stop_times.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
+    # db_seq.create_index([("trip_id", ASCENDING),("stop_id", ASCENDING)])
+    # db_seq.create_index([("service_id", ASCENDING),("seq", ASCENDING),("route_id", ASCENDING),("stop_id", ASCENDING)])
+    # db_stops.create_index([("stop_id", ASCENDING)])
+    # db_trips.create_index([("service_id", ASCENDING), ("trip_id", ASCENDING)])
+    # db_trips.create_index([("service_id", ASCENDING), ("route_id", ASCENDING)])
+    # db_trips.create_index([("trip_id", ASCENDING)])
+
+    # client.cota_gtfs_new_trips[str(each_time_stamp) + "_new_trips"].create_index([("service_id", ASCENDING), ("route_id", ASCENDING)])
 
 ###################### GTFS real-time indexes ######################
 
 db_real_time = client.cota_real_time
-db_diff = client.cota_diff
+# db_diff = client.cota_diff
 
-start_date = date(2019, 1, 31)
-end_date = date(2019, 6, 20)
+start_date = date(2018, 5, 7)
+end_date = date(2019, 5, 6)
 date_range = transfer_tools.daterange(start_date, end_date)
 for each_date in date_range:
     today_date = each_date.strftime("%Y%m%d")  # date
-    col_real_time = db_real_time["R" + today_date]
+    col_real_time = db_real_time[today_date]
     col_real_time.create_index([("stop_id", ASCENDING),("route_id", ASCENDING)])
 
-
+    col_real_time.create_index([("stop_id", ASCENDING),("route_id", ASCENDING), ("trip_sequence", ASCENDING)])
 
 
 

@@ -14,6 +14,7 @@ db_GTFS = client.cota_gtfs
 db_time_stamps_set = set()
 db_time_stamps = []
 db_real_time = client.cota_real_time
+db_apc_real_time = client.cota_apc_real_time
 db_trip_update = client.trip_update
 
 raw_stamps = db_GTFS.list_collection_names()
@@ -63,7 +64,7 @@ def sortQuery(A):
     return A["seq"]
 
 
-def find_alt_time(generating_time, route_id, stop_id, today_date, criteria):
+def find_alt_time(generating_time, route_id, stop_id, today_date):
     if type(generating_time) is not int:
         return ["no_realtime_trip", "no_realtime_trip", "no_realtime_trip"]
     col_real_time = db_real_time["R" + today_date]
@@ -75,7 +76,29 @@ def find_alt_time(generating_time, route_id, stop_id, today_date, criteria):
         return "no_realtime_trip"
     for index in range(len(alt_trips_list)):
         i_real_time = alt_trips_list[index]["time"]
-        if generating_time <= i_real_time + criteria:
+        if generating_time <= i_real_time:
+            real_time = i_real_time
+            real_trip = alt_trips_list[index]["trip_id"]
+            real_trip_seq = alt_trips_list[index]["trip_sequence"]
+            break
+    if real_time == -1:
+        return ["no_realtime_trip", "no_realtime_trip", "no_realtime_trip"]
+    else:
+        return [real_time, real_trip, real_trip_seq]
+
+def find_alt_time_apc(generating_time, route_id, stop_id, today_date):
+    if type(generating_time) is not int:
+        return ["no_realtime_trip", "no_realtime_trip", "no_realtime_trip"]
+    col_real_time = db_apc_real_time[today_date]
+    real_time = -1
+    alt_trips_list = list(col_real_time.find(
+        {"stop_id": stop_id, "route_id": route_id}))
+    alt_trips_list = sorted(alt_trips_list, key=lambda i: (i['actual_departure_time']))
+    if len(alt_trips_list) == 0:
+        return "no_realtime_trip"
+    for index in range(len(alt_trips_list)):
+        i_real_time = alt_trips_list[index]["actual_departure_time"]
+        if generating_time <= i_real_time:
             real_time = i_real_time
             real_trip = alt_trips_list[index]["trip_id"]
             real_trip_seq = alt_trips_list[index]["trip_sequence"]
@@ -88,6 +111,6 @@ def find_alt_time(generating_time, route_id, stop_id, today_date, criteria):
 
 if __name__ == "__main__":
     # test
-    a = find_alt_time("1517666601", 2, "HIGWESS", "20180203", 5)
+    a = find_alt_time("1517666601", 2, "HIGWESS", "20180203")
 
     print(1517666601, a)
