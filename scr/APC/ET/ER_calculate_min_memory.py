@@ -47,16 +47,16 @@ def analyze_transfer(start_date_p, memory):
                 records_dic[trip_id][stop_id] = {}
                 records_dic[trip_id][stop_id]["trip_id"] = trip_id
                 records_dic[trip_id][stop_id]["stop_id"] = stop_id
-                records_dic[trip_id][stop_id]["sum_time"] = each_record["actual_departure_time"] - \
+                records_dic[trip_id][stop_id]["time"] = each_record["actual_departure_time"] - \
                     today_seconds
                 records_dic[trip_id][stop_id]["count"] = 1
             else:
-                records_dic[trip_id][stop_id]["sum_time"] += (each_record["actual_departure_time"] - today_seconds)
+                records_dic[trip_id][stop_id]["time"] = min(
+                    records_dic[trip_id][stop_id]["time"], each_record["actual_departure_time"] - today_seconds)
                 records_dic[trip_id][stop_id]["count"] += 1
 
     for trip_id, trip_records in records_dic.items():
         for stop_id, stop_time_records in trip_records.items():
-            stop_time_records["time"] = stop_time_records["sum_time"]/stop_time_records["count"]
             col_er.insert_one(stop_time_records)
 
     col_er.create_index([("trip_id", ASCENDING), ("stop_id", ASCENDING)])
