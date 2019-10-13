@@ -300,14 +300,15 @@ function visualizationReduce(stops, variableCode) {
   var baseRadius = 84;
   var colorRamp, colorCode;
 
-  // var title = "ST - PT Optimal Waiting Time Difference (min)"
-  // var title = "PT Optimal Missed Risk (%)"
+  var title = "PT Optimal - ST Waiting Time Difference (seconds)"
+  // var title = "ST Missed Risk (%)"
   // var title = "PT Optimal Buffers (seconds)"
-  var title = "AT Waiting Time (min)"
+  // var title = "ST Waiting Time (seconds)"
+  // var title = "GT Waiting Time (seconds)"
 
-  // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
-  var colorRamp = [0, 150, 200, 250, 300, 450, 600, Infinity] // PR opt waiting time per se
-  // var colorRamp = [0, 140, 150, 160, 170, 180, 200, Infinity] // buffer
+  var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
+  // var colorRamp = [0, 150, 200, 250, 300, 450, 600, Infinity] // PR opt waiting time per se
+  // var colorRamp = [0, 100, 150, 175, 200, 225, 250, Infinity] // buffer
   // var colorRamp = [0, 2.5, 5, 10, 15, 20, 25, 100] // miss rate
   // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
   // var colorRamp = [-Infinity, 0, 200, 300, 400, 500, 600, Infinity] // rr and pr_opt diff
@@ -316,7 +317,12 @@ function visualizationReduce(stops, variableCode) {
   // var colorRamp = [0, 100, 200, 300, 400, 500, 600, Infinity] // ar and er and nr
 
 
+
   // var colorRamp = [0, 10, 25, 40, 50, 60, 75, 100] // rr miss rate
+  // var colorRamp = [0, 10, 12, 14, 16, 18, 20, 100] // er miss rate
+  // var colorRamp = [0, 1, 2, 5, 10, 25, 50, 100] // nr miss rate
+
+  // var colorRamp = [0, 200, 300, 400, 500, 600, 750, 2000] // rr waiting time
 
 
   var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
@@ -338,9 +344,9 @@ function visualizationReduce(stops, variableCode) {
         miss_rate: stops[i]["mc_pr_opt_" + j.toString()] / stops[i]["total"] * 100,
         // fillColor: returnColor(stops[i]["delay"] / stops[i]["count"], colorRamp, colorCode) // Delay
 
-        fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
+        // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
-        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt, RR difference
+        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt and RR difference
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"] * 100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i][variableCode] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate for static
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff

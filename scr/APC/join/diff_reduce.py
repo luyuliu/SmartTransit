@@ -33,7 +33,7 @@ def reduce_diff(start_date, end_date):
     for single_date in date_range:
         today_date = single_date.strftime("%Y%m%d")  # date
         col_diff = db_diff[today_date]
-
+        
         that_time_stamp = transfer_tools.find_gtfs_time_stamp(single_date)
 
         rl_diff = list(col_diff.find({"route_id": designated_route_id}))
