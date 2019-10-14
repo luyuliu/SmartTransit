@@ -31,9 +31,9 @@ designated_route_id = 2
 def reduce_diff(start_date, end_date):
     date_range = transfer_tools.daterange(start_date, end_date)
     
-    wt_ar = 0
-    wt_ar_count = 0
     for single_date in date_range:
+        wt_ar = 0
+        wt_ar_count = 0
 
         today_date = single_date.strftime("%Y%m%d")  # date
         col_diff = db_diff[today_date]
@@ -54,7 +54,7 @@ def reduce_diff(start_date, end_date):
                 wt_ar_count += 1
         
         if wt_ar_count != 0:
-            print(today_date, wt_ar/wt_ar_count)
+            print(today_date, wt_ar/wt_ar_count, wt_ar_count)
         else:
             print(0)
 

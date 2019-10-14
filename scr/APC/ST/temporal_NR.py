@@ -32,7 +32,7 @@ def reduce_diff(start_date, end_date):
     for single_date in date_range:
 
         today_date = single_date.strftime("%Y%m%d")  # date
-        col_diff = db_diff["MX" + "_" + today_date]
+        col_diff = db_diff[today_date]
 
         rl_opt_result = list(
             col_diff.find({}))
@@ -41,15 +41,15 @@ def reduce_diff(start_date, end_date):
         wt_nr_count = 0
 
         for each_record in rl_opt_result:
-            time_nr_alt = each_record["time_actual"]
-            time_nr_arr = each_record["time_normal"]
+            time_nr_alt = each_record["time_nr_alt"]
+            time_nr_arr = int(each_record["time_nr_arr"])
 
             if type(time_nr_alt) is int and type(time_nr_arr) is int and time_nr_alt != 0 and time_nr_arr != 0:
                 wt_nr += time_nr_alt - time_nr_arr
                 wt_nr_count += 1
         
         if wt_nr_count != 0:
-            print(today_date, wt_nr/wt_nr_count)
+            print(today_date, wt_nr/wt_nr_count, wt_nr_count)
         else:
             print(0)
 
