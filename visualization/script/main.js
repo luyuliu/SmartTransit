@@ -325,7 +325,7 @@ function visualizationReduce(stops, variableCode) {
   // var colorRamp = [0, 200, 300, 400, 500, 600, 750, 2000] // rr waiting time
 
 
-  var colorCode = ["#0080FF", "#5CAEA2", "#B9DC45", "#FFDC00", "#FF9700", "#FF2000", "#9932CC"]
+  var colorCode = ['#4575b4','#91bfdb','#e0f3f8','#ffffbf','#fee090','#fc8d59','#d73027']
 
   for (var j = 9; j >= 0; j--) {
     for (var i = 0; i < stops.length; i++) {
