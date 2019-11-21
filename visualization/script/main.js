@@ -42,7 +42,7 @@ function switchStatus(status, line) {
 }
 
 
-var baseLayer = L.esri.basemapLayer('Gray')
+var baseLayer = L.esri.basemapLayer('DarkGray')
 map = L.map("map", {
   zoom: 12.5,
   zoomSnap: 0.25,
@@ -300,29 +300,38 @@ function visualizationReduce(stops, variableCode) {
   var baseRadius = 84;
   var colorRamp, colorCode;
 
-  var title = "PT Optimal - ST Waiting Time Difference (seconds)"
-  // var title = "ST Missed Risk (%)"
+  // var title = "PT Optimal Waiting Time (seconds)"
   // var title = "PT Optimal Buffers (seconds)"
-  // var title = "ST Waiting Time (seconds)"
+  // var title = "AT Waiting Time (seconds)"
+  // var title = "ET Waiting Time (seconds)"
   // var title = "GT Waiting Time (seconds)"
 
-  var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
-  // var colorRamp = [0, 150, 200, 250, 300, 450, 600, Infinity] // PR opt waiting time per se
+
+  // var title = "ST Missed Risk (%)"
+  // var title = "ET Missed Risk (%)"
+  // var title = "GT Missed Risk (%)"
+  var title = "PT Optimal Missed Risk (%)"
+
+  // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
+  // var colorRamp = [0, 200, 250, 300, 350, 400, 500, Infinity] // PR opt waiting time per se
   // var colorRamp = [0, 100, 150, 175, 200, 225, 250, Infinity] // buffer
-  // var colorRamp = [0, 2.5, 5, 10, 15, 20, 25, 100] // miss rate
   // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
   // var colorRamp = [-Infinity, 0, 200, 300, 400, 500, 600, Infinity] // rr and pr_opt diff
   // var colorRamp = [0, 250, 300, 350, 400, 500, 600, Infinity] // er and pr_opt diff
 
   // var colorRamp = [0, 100, 200, 300, 400, 500, 600, Infinity] // ar and er and nr
 
+  // var colorRamp = [0, 200, 225, 250, 275, 300, 350, Infinity] // er wt
+  // var colorRamp = [0, 100, 200, 300, 400, 500, 600, Infinity] // Nr
 
-
-  // var colorRamp = [0, 10, 25, 40, 50, 60, 75, 100] // rr miss rate
-  // var colorRamp = [0, 10, 12, 14, 16, 18, 20, 100] // er miss rate
-  // var colorRamp = [0, 1, 2, 5, 10, 25, 50, 100] // nr miss rate
-
+  // var colorRamp = [0, 400, 425, 450, 475, 500, 600, Infinity] // ar
   // var colorRamp = [0, 200, 300, 400, 500, 600, 750, 2000] // rr waiting time
+
+  // var colorRamp = [0, 20, 30, 40, 50, 60, 75, 100] // rr miss rate
+  // var colorRamp = [0, 10, 12, 14, 16, 18, 20, 100] // er miss rate
+  // var colorRamp = [0, 2, 4, 6, 8, 10, 15, 100] // nr miss rate
+  var colorRamp = [0, 2, 5, 7.5, 10, 12, 15, 100] // PR OPT miss rate
+
 
 
   var colorCode = ['#4575b4','#91bfdb','#e0f3f8','#ffffbf','#fee090','#fc8d59','#d73027']
@@ -346,8 +355,8 @@ function visualizationReduce(stops, variableCode) {
 
         // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
-        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt and RR difference
-        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"] * 100, colorRamp, colorCode) // miss rate
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt and RR difference
+        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"] * 100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i][variableCode] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate for static
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
         // fillColor: returnColor((stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
