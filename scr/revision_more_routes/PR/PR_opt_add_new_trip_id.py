@@ -14,7 +14,7 @@ db_real_time = client.cota_real_time
 db_trip_update = client.trip_update
 db_opt_result = client.cota_re_pr_cal
 
-the_route_id = 8
+the_route_id = 7
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

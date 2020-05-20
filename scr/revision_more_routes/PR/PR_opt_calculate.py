@@ -12,7 +12,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import transfer_tools
 
-the_route_id = "008"
+the_route_id = "007"
 
 db_GTFS = client.cota_gtfs
 db_real_time = client.cota_apc_real_time

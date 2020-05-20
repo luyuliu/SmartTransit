@@ -21,7 +21,7 @@ import transfer_tools
 # main loop
 # enumerate every day in the range
 walking_time_limit = 10
-the_route_id = "008"
+the_route_id = "007"
 
 def validate_stop_time(single_date):
     dic_stops = {}

@@ -11,7 +11,7 @@ client = MongoClient('mongodb://localhost:27017/')
 
 db_opt_result = client.cota_re_pr_cal
 db_opt_fin = client.cota_re_pr_opt
-the_route_id = 8
+the_route_id = 7
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

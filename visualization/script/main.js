@@ -301,9 +301,9 @@ function visualizationReduce(stops, variableCode) {
   var baseRadius = 84;
   var colorRamp, colorCode;
 
-  var title = "PT - ST Waiting Time Difference (seconds)"
+  // var title = "PT - ST Waiting Time Difference (seconds)"
 
-  // var title = "PT Waiting Time (seconds)"
+  var title = "PT optimal Waiting Time (seconds) for route No."+ Math.abs(parseInt($("#route-3-input").val()))
   // var title = "PT Optimal Buffers (seconds)"
   // var title = "AT Waiting Time (seconds)"
   // var title = "ET Waiting Time (seconds)"

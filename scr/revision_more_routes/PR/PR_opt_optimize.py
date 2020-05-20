@@ -8,7 +8,7 @@ import datetime
 import multiprocessing
 client = MongoClient('mongodb://localhost:27017/')
 
-the_route_id = 8
+the_route_id = 7
 
 db_GTFS = client.cota_gtfs
 db_real_time = client.cota_real_time

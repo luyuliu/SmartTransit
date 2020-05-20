@@ -22,7 +22,7 @@ db_diff_reduce = client.cota_re_reduce
 
 walking_time_limit = 10 # min
 criteria = 5 # seconds
-the_route_id = -8
+the_route_id = 10
 
 all_route = [1, 2, 5, 7, 8, 10]
 
