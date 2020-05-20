@@ -278,6 +278,7 @@ $("#start-3-btn").click(function () {
   var routeID = $("#route-3-input").val()
   var variableCode = $("#variable-3-input").val()
   var queryURL = "http://127.0.0.1:50033/APC_" + routeID
+  var queryURL = "http://127.0.0.1:50033/RE_" + routeID
   // var queryURL = "http://127.0.0.1:50033/delay"
   console.log(queryURL)
 
@@ -314,8 +315,8 @@ function visualizationReduce(stops, variableCode) {
   // var title = "GT Missed Risk (%)"
   // var title = "PT Missed Risk (%)"
 
-  var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
-  // var colorRamp = [0, 200, 250, 300, 350, 400, 500, Infinity] // PR opt waiting time per se
+  // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
+  var colorRamp = [0, 200, 250, 300, 350, 400, 500, Infinity] // PR opt waiting time per se
   // var colorRamp = [0, 100, 150, 175, 200, 225, 250, Infinity] // buffer
   // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
   // var colorRamp = [-Infinity, 0, 200, 300, 400, 500, 600, Infinity] // rr and pr_opt diff
