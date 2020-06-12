@@ -55,8 +55,8 @@ def reduce_diff(start_date, end_date):
                 visit_tag = True
                 first_stop_id = stop_id
                 first_trip_id = trip_id
-            time_normal = single_stop_time["time_normal"]
-            time_actual = single_stop_time["time_actual"]
+            time_normal = single_stop_time["scheduled_time"]
+            time_actual = single_stop_time["actual_departure_time"]
             # query stop_times
             try:
                 dic_stops[stop_id]
@@ -91,8 +91,8 @@ def reduce_diff(start_date, end_date):
             # RR
 
             try:
-                time_alt = single_stop_time["time_alt"]
-                time_arr = single_stop_time["time_smart"]
+                time_alt = single_stop_time["time_er_alt"]
+                time_arr = single_stop_time["time_er_arr"]
             except:
                 continue
             if time_alt == 0 or time_arr == 0:
@@ -111,13 +111,14 @@ def reduce_diff(start_date, end_date):
                 else:
                     dic_stops[stop_id]["wt_er"] += wt_er
                     dic_stops[stop_id]["dt_er"] += dt_er
+                    # print(wt_er)
                     if time_alt > time_actual:
                         dic_stops[stop_id]["mc_er"]+=1
 
             dic_stops[stop_id]["total"] += 1
             if error_tag:
                 error_count += 1
-        # print(today_date, " - Done.")
+        print(today_date, " - Done.")
 
     # print(today_date, " - Insert start.")
     db_result_route = db_diff_reduce["RE_ER_buffer_" + str(the_route_id)]
