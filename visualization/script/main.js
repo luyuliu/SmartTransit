@@ -43,6 +43,7 @@ function switchStatus(status, line) {
 
 
 var baseLayer = L.esri.basemapLayer('DarkGray')
+
 map = L.map("map", {
   zoom: 12.5,
   zoomSnap: 0.25,
@@ -52,6 +53,11 @@ map = L.map("map", {
   attributionControl: false,
   maxZoom: 18
 });
+console.log(map.supportedCanvasMimeTypes())
+
+// var baseLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+//   attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+// }).addTo(map);
 
 new L.Control.Zoom({ position: 'topright' }).addTo(map);
 
@@ -104,15 +110,14 @@ function zoomIn(e) {
   }
 }
 
-L.control.browserPrint({
-  printModes: ["Portrait", "Landscape", "Auto", "Custom"],
-  position: "topright"
-}).addTo(map);
+// L.control.browserPrint({
+//   printModes: ["Portrait", "Landscape", "Auto", "Custom"],
+//   position: "topright"
+// }).addTo(map);
 
-
+console.log(map.supportedCanvasMimeTypes())
 $("#snap-btn").click(function () {
-  $("#status").html("Running...")
-
+  map.downloadExport({container: map._container, format:"image/png", fileName: "map.png"})
 });
 
 $("#down-btn").click(function () {
@@ -278,7 +283,7 @@ $("#start-3-btn").click(function () {
   var routeID = $("#route-3-input").val()
   var variableCode = $("#variable-3-input").val()
   var queryURL = "http://127.0.0.1:50033/APC_" + routeID
-  var queryURL = "http://127.0.0.1:50033/RE_" + routeID
+  // var queryURL = "http://127.0.0.1:50033/RE_" + routeID
   // var queryURL = "http://127.0.0.1:50033/delay"
   console.log(queryURL)
 
@@ -291,7 +296,7 @@ $("#start-3-btn").click(function () {
     },
     success: function (rawstops) {
       var stops = rawstops._items
-      console.log(stops)
+      // console.log(stops)
       visualizationReduce(stops, variableCode);
     }
   });
@@ -303,7 +308,7 @@ function visualizationReduce(stops, variableCode) {
 
   // var title = "PT - ST Waiting Time Difference (seconds)"
 
-  var title = "PT optimal Waiting Time (seconds) for route No."+ Math.abs(parseInt($("#route-3-input").val()))
+  var title = "PT optimal Waiting Time (seconds) for route No." + Math.abs(parseInt($("#route-3-input").val()))
   // var title = "PT Optimal Buffers (seconds)"
   // var title = "AT Waiting Time (seconds)"
   // var title = "ET Waiting Time (seconds)"
@@ -316,7 +321,7 @@ function visualizationReduce(stops, variableCode) {
   // var title = "PT Missed Risk (%)"
 
   // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
-  var colorRamp = [0, 200, 250, 300, 350, 400, 500, Infinity] // PR opt waiting time per se
+  // var colorRamp = [0, 200, 250, 300, 350, 400, 500, Infinity] // PR opt waiting time per se
   // var colorRamp = [0, 100, 150, 175, 200, 225, 250, Infinity] // buffer
   // var colorRamp = [0, 100, 150, 200, 250, 300, 600, Infinity] // ar and pr_opt diff
   // var colorRamp = [-Infinity, 0, 200, 300, 400, 500, 600, Infinity] // rr and pr_opt diff
@@ -328,23 +333,40 @@ function visualizationReduce(stops, variableCode) {
   // var colorRamp = [0, 100, 200, 300, 400, 500, 600, Infinity] // Nr
 
   // var colorRamp = [0, 400, 425, 450, 475, 500, 600, Infinity] // ar
-  // var colorRamp = [0, 200, 300, 400, 500, 600, 750, 2000] // rr waiting time
+  var colorRamp = [400, 450, 500, 550, 600, 650, 700, 2000] // rr waiting time
 
   // var colorRamp = [0, 20, 30, 40, 50, 60, 75, 100] // rr miss rate
   // var colorRamp = [0, 10, 12, 14, 16, 18, 20, 100] // er miss rate
   // var colorRamp = [0, 2, 4, 6, 8, 10, 15, 100] // nr miss rate
   // var colorRamp = [0, 2, 5, 7.5, 10, 12, 15, 100] // PR OPT miss rate
 
+  station_list = ["HIGFENS", "HIGMORN", "HIGSCHN", "HIGNORN1", "HIGHUDN", "HIGCHIN", "HIG5THN", "MAIDREW", "MAIJAMW", "MAIHAMW", "GRTEASW", "MAIFOUW", "MAIBRICW", "HANMAIN"]
 
+  station_list_copy = ["HIGFENS", "HIGMORN", "HIGSCHN", "HIGNORN1", "HIGHUDN", "HIGCHIN", "HIG5THN", "MAIDREW", "MAIJAMW", "MAIHAMW", "GRTEASW", "MAIFOUW", "MAIBRICW", "HANMAIN"]
 
-  var colorCode = ['#4575b4','#91bfdb','#e0f3f8','#ffffbf','#fee090','#fc8d59','#d73027']
-
+  console.log(station_list.length)
+  var colorCode = ['#4575b4', '#91bfdb', '#e0f3f8', '#ffffbf', '#fee090', '#fc8d59', '#d73027']
+  time_point_count = 0
   for (var j = 9; j >= 0; j--) {
     for (var i = 0; i < stops.length; i++) {
+      // if (j == 9) {
+      if (station_list.indexOf(stops[i]["stop_id"]) != -1) {
+        aweight = 1
+        time_point_count += 1
+        console.log(stops[i]["stop_id"])
+        const index = station_list_copy.indexOf(stops[i]["stop_id"]);
+        if (index > -1) {
+          station_list_copy.splice(index, 1);
+        }
+      }
+      else {
+        aweight = 0.2
+      }
+      // }
       var cir = L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
         radius: baseRadius * j,
         stroke: true,
-        weight: 0.2,
+        weight: aweight,
         color: "#000000",
         fillOpacity: 1,
         info: stops[i],
@@ -357,8 +379,8 @@ function visualizationReduce(stops, variableCode) {
         // fillColor: returnColor(stops[i]["delay"] / stops[i]["count"], colorRamp, colorCode) // Delay
 
         // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
-        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
-        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt and RR difference
+        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt and RR difference
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"] * 100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i][variableCode] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate for static
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
@@ -374,10 +396,10 @@ function visualizationReduce(stops, variableCode) {
       })
 
       cir.addTo(map);
-      console.log((stops[i]["mc_rr_" + j.toString()] - stops[i][variableCode + "_" + j.toString()]) / stops[i]["total"])
+      // console.log((stops[i]["mc_rr_" + j.toString()] - stops[i][variableCode + "_" + j.toString()]) / stops[i]["total"])
     }
   }
-
+  console.log("asdf", station_list_copy)
 
   var legend = L.control({ position: "bottomright" });
   legend.onAdd = function (map) {
@@ -388,7 +410,7 @@ function visualizationReduce(stops, variableCode) {
     legendContent2 += "<h3>" + title + "</h3>"
     legendContent2 += '<table><tbody>'
     for (var i = 0; i < colorCode.length; i++) {
-      console.log(i)
+      // console.log(i)
       if (colorRamp[i] == -Infinity) {
         labelContent2 = "( -∞, " + colorRamp[i + 1] + ")";
       }
