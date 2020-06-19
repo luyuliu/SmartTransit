@@ -308,16 +308,17 @@ function visualizationReduce(stops, variableCode) {
 
   // var title = "PT - ST Waiting Time Difference (seconds)"
 
-  var title = "PT optimal Waiting Time (seconds) for route No." + Math.abs(parseInt($("#route-3-input").val()))
+  // var title = "PT optimal Waiting Time (seconds) for route No." + Math.abs(parseInt($("#route-3-input").val()))
   // var title = "PT Optimal Buffers (seconds)"
   // var title = "AT Waiting Time (seconds)"
   // var title = "ET Waiting Time (seconds)"
-  // var title = "GT Waiting Time (seconds)"
+  var title = "GT Waiting Time (seconds)"
+  // var title = "ST Waiting Time (seconds)"
 
 
   // var title = "ST Missed Risk (%)"
   // var title = "ET Missed Risk (%)"
-  // var title = "GT Missed Risk (%)"
+  var title = "GT Missed Risk (%)"
   // var title = "PT Missed Risk (%)"
 
   // var colorRamp = [-Infinity, -60, -30, 0, 30, 60, 120, Infinity] // nr and pr_opt diff
@@ -331,11 +332,13 @@ function visualizationReduce(stops, variableCode) {
 
   // var colorRamp = [0, 200, 225, 250, 275, 300, 350, Infinity] // er wt
   // var colorRamp = [0, 100, 200, 300, 400, 500, 600, Infinity] // Nr
+  // var colorRamp = [0, 200, 220, 240, 260, 280, 300, 380] // Nr
 
   // var colorRamp = [0, 400, 425, 450, 475, 500, 600, Infinity] // ar
-  var colorRamp = [400, 450, 500, 550, 600, 650, 700, 2000] // rr waiting time
+  // var colorRamp = [400, 450, 500, 550, 600, 650, 700, 2000] // rr waiting time
 
   // var colorRamp = [0, 20, 30, 40, 50, 60, 75, 100] // rr miss rate
+  var colorRamp = [0, 45, 60, 65, 70, 75, 80, 100] // rr miss rate
   // var colorRamp = [0, 10, 12, 14, 16, 18, 20, 100] // er miss rate
   // var colorRamp = [0, 2, 4, 6, 8, 10, 15, 100] // nr miss rate
   // var colorRamp = [0, 2, 5, 7.5, 10, 12, 15, 100] // PR OPT miss rate
@@ -351,7 +354,7 @@ function visualizationReduce(stops, variableCode) {
     for (var i = 0; i < stops.length; i++) {
       // if (j == 9) {
       if (station_list.indexOf(stops[i]["stop_id"]) != -1) {
-        aweight = 1
+        aweight = 1.3
         time_point_count += 1
         console.log(stops[i]["stop_id"])
         const index = station_list_copy.indexOf(stops[i]["stop_id"]);
@@ -360,7 +363,7 @@ function visualizationReduce(stops, variableCode) {
         }
       }
       else {
-        aweight = 0.2
+        aweight = 0.1
       }
       // }
       var cir = L.circle([parseFloat(stops[i].lat), parseFloat(stops[i].lon)], {
@@ -379,12 +382,12 @@ function visualizationReduce(stops, variableCode) {
         // fillColor: returnColor(stops[i]["delay"] / stops[i]["count"], colorRamp, colorCode) // Delay
 
         // fillColor: returnColor(stops[i][variableCode], colorRamp, colorCode) // NR, AR, ER
-        fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
+        // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()], colorRamp, colorCode) // PR_opt, RR and buffer
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] - stops[i]["wt_nr"] , colorRamp, colorCode) // PR_opt and RR difference
         // fillColor: returnColor(stops[i][variableCode + "_" + j.toString()] / stops[i]["total"] * 100, colorRamp, colorCode) // miss rate
         // fillColor: returnColor(stops[i][variableCode] / stops[i]["total"]*100, colorRamp, colorCode) // miss rate for static
         // fillColor: returnColor(stops[i]["wt_er"] - stops[i][variableCode + "_" + j.toString()] , colorRamp, colorCode) // ar/er and pr_opt diff
-        // fillColor: returnColor((stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
+        fillColor: returnColor((stops[i][variableCode + "_" + j.toString()])/ stops[i]["total"]*100, colorRamp, colorCode) // rr and pr_opt diff, for missrate or waiting time
 
         // fillColor: returnColor(stops[i]["wt_ar"] - stops[i]["wt_er"] , colorRamp, colorCode) // ar/er and pr_opt diff
 
